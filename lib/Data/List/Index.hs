@@ -13,7 +13,9 @@ module Data.List.Index
 
   -- * Monadic functions
   imapM, iforM,
+  imapM_, iforM_,
   itraverse, ifor,
+  itraverse_, ifor_,
 
   -- * Special folds
   iall,
@@ -54,11 +56,6 @@ imapAccumR
 imapAccumL
 
 ipartition
-
-itraverse_
-ifor_
-imapM_
-iforM_
 
 izipWith
 izipWith3
@@ -108,6 +105,26 @@ itraverse f as = ifoldr k (pure []) as
 ifor :: Applicative m => [a] -> (Int -> a -> m b) -> m [b]
 ifor = flip itraverse
 {-# INLINE ifor #-}
+
+imapM_ :: Monad m => (Int -> a -> m b) -> [a] -> m ()
+imapM_ f as = ifoldr k (return ()) as
+  where
+    k i a r = f i a >> r
+{-# INLINE imapM_ #-}
+
+iforM_ :: Monad m => [a] -> (Int -> a -> m b) -> m ()
+iforM_ = flip imapM_
+{-# INLINE iforM_ #-}
+
+itraverse_ :: Applicative m => (Int -> a -> m b) -> [a] -> m ()
+itraverse_ f as = ifoldr k (pure ()) as
+  where
+    k i a r = f i a *> r
+{-# INLINE itraverse_ #-}
+
+ifor_ :: Applicative m => [a] -> (Int -> a -> m b) -> m ()
+ifor_ = flip itraverse_
+{-# INLINE ifor_ #-}
 
 -- Using unboxed ints here doesn't seem to result in any benefit
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b

@@ -54,6 +54,18 @@ main = defaultMain [
           bench "rec" $ nf (\n -> flip runState [] $ imapM_rec (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
           bench "our" $ nf (\n -> flip runState [] $ imapM (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000 ] ],
 
+  bgroup "imapM_" [
+      bgroup "Just" [
+          bench "zip" $ nf (\n -> imapM__zip (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "zipWith" $ nf (\n -> imapM__zipWith (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "rec" $ nf (\n -> imapM__rec (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "our" $ nf (\n -> imapM_ (\i x -> if i==x then Just i else Nothing) [0..n]) 100000 ],
+      bgroup "State" [
+          bench "zip" $ nf (\n -> flip runState [] $ imapM__zip (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "zipWith" $ nf (\n -> flip runState [] $ imapM__zipWith (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "rec" $ nf (\n -> flip runState [] $ imapM__rec (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "our" $ nf (\n -> flip runState [] $ imapM_ (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000 ] ],
+
   bgroup "ifilter" [
       bench "rec" $ nf (\n -> ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
       bench "fold" $ nf (\n -> ifilter_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
@@ -101,6 +113,23 @@ imapM_rec f as = go 0# as
       xs' <- go (i +# 1#) xs
       return (x':xs')
 {-# INLINE imapM_rec #-}
+
+imapM__zip :: Monad m => (Int -> a -> m b) -> [a] -> m ()
+imapM__zip f xs = mapM_ (uncurry f) (zip [0..] xs)
+{-# INLINE imapM__zip #-}
+
+imapM__zipWith :: Monad m => (Int -> a -> m b) -> [a] -> m ()
+imapM__zipWith f xs = zipWithM_ f [0..] xs
+{-# INLINE imapM__zipWith #-}
+
+imapM__rec :: Monad m => (Int -> a -> m b) -> [a] -> m ()
+imapM__rec f as = go 0# as
+  where
+    go _ [] = return ()
+    go i (x:xs) = do
+      f (I# i) x
+      go (i +# 1#) xs
+{-# INLINE imapM__rec #-}
 
 iall_zip :: (Int -> a -> Bool) -> [a] -> Bool
 iall_zip p xs = and (zipWith p [0..] xs)
