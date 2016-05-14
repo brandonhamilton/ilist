@@ -14,6 +14,18 @@ import Criterion.Main
 
 main :: IO ()
 main = defaultMain [
+  bgroup "iall" [
+      bgroup "full" [
+          bench "zip" $ nf (\n -> iall_zip (==) [0..n]) 100000,
+          bench "map" $ nf (\n -> iall_map (==) [0..n]) 100000,
+          bench "rec" $ nf (\n -> iall_rec (==) [0..n]) 100000,
+          bench "our" $ nf (\n -> iall (==) [0..n]) 100000 ],
+      bgroup "early" [
+          bench "zip" $ nf (\n -> iall_zip (/=) [0..n]) 100000,
+          bench "map" $ nf (\n -> iall_map (/=) [0..n]) 100000,
+          bench "rec" $ nf (\n -> iall_rec (/=) [0..n]) 100000,
+          bench "our" $ nf (\n -> iall (/=) [0..n]) 100000 ] ],
+
   bgroup "imap" [
       bgroup "consume" [
           bench "rec" $ nf (\n -> sum $ imap_rec (+) [0..n]) 100000,
@@ -55,6 +67,21 @@ main = defaultMain [
       bench "zip" $ nf (\n -> ifoldl'_zip (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
       bench "fold" $ nf (\n -> ifoldl'_fold (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
       bench "our" $ nf (\n -> ifoldl' (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000 ] ]
+
+iall_zip :: (Int -> a -> Bool) -> [a] -> Bool
+iall_zip p xs = all (uncurry p) (zip [0..] xs)
+{-# INLINE iall_zip #-}
+
+iall_map :: (Int -> a -> Bool) -> [a] -> Bool
+iall_map f xs = and (imap f xs)
+{-# INLINE iall_map #-}
+
+iall_rec :: (Int -> a -> Bool) -> [a] -> Bool
+iall_rec p = go 0#
+  where
+    go _ [] = True
+    go i (x:xs) = p (I# i) x && go (i +# 1#) xs
+{-# INLINE iall_rec #-}
 
 ifoldr_zip :: (Int -> a -> b -> b) -> b -> [a] -> b
 ifoldr_zip f a xs = foldr (\(i, x) acc -> f i x acc) a (zip [0..] xs)

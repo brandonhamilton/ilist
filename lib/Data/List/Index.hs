@@ -11,6 +11,10 @@ module Data.List.Index
   -- * Transformations
   imap,
 
+  -- * Special folds
+  iall,
+  iany,
+
   -- * Folds
   ifoldr,
   ifoldr1,
@@ -38,8 +42,6 @@ import GHC.Exts
 
 {- Left to implement:
 
-iany
-iall
 iconcatMap
 ifoldrM
 ifoldlM
@@ -72,6 +74,16 @@ imap f xs = build $ \c n ->
   let go x cont i = f (I# i) x `c` cont (i +# 1#)
   in foldr go (\_ -> n) xs 0#
 {-# INLINE imap #-}
+
+iall :: (Int -> a -> Bool) -> [a] -> Bool
+iall p ls = foldr go (\_ -> True) ls 0#
+  where go x r k = p (I# k) x && r (k +# 1#)
+{-# INLINE iall #-}
+
+iany :: (Int -> a -> Bool) -> [a] -> Bool
+iany p ls = foldr go (\_ -> False) ls 0#
+  where go x r k = p (I# k) x || r (k +# 1#)
+{-# INLINE iany #-}
 
 -- Using unboxed ints here doesn't seem to result in any benefit
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b
