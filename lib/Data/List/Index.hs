@@ -1,5 +1,6 @@
 {-# LANGUAGE
 CPP,
+MagicHash,
 ScopedTypeVariables,
 BangPatterns
   #-}
@@ -10,6 +11,10 @@ module Data.List.Index
   -- * Folds
   ifoldl, ifoldl',
   ifoldl1, ifoldl1',
+
+  -- * Search
+  ifindIndex,
+  ifindIndices,
 )
 where
 
@@ -21,17 +26,21 @@ import GHC.Base (oneShot)
 #define ONE_SHOT
 #endif
 
+import Data.Maybe
+import GHC.Exts
+
 {- Left to implement:
 
 imap
 iany
 iall
 iconcatMap
-ifind
 ifoldrM
 ifoldlM
 imapAccumR
 imapAccumL
+
+ifind
 ifilter
 
 itraverse
@@ -82,6 +91,16 @@ ifoldl1 _ []     = errorEmptyList "ifoldl1"
 ifoldl1' :: (Int -> a -> a -> a) -> [a] -> a
 ifoldl1' f (x:xs) = ifoldl' f x xs
 ifoldl1' _ []     = errorEmptyList "ifoldl1'"
+
+ifindIndex :: (Int -> a -> Bool) -> [a] -> Maybe Int
+ifindIndex p = listToMaybe . ifindIndices p
+
+ifindIndices :: (Int -> a -> Bool) -> [a] -> [Int]
+ifindIndices p ls = build $ \c n ->
+  let go x r k | p (I# k) x = I# k `c` r (k +# 1#)
+               | otherwise  = r (k +# 1#)
+  in foldr go (\_ -> n) ls 0#
+{-# INLINE ifindIndices #-}
 
 errorEmptyList :: String -> a
 errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
