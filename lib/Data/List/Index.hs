@@ -43,6 +43,10 @@ import GHC.Base (oneShot)
 #define ONE_SHOT
 #endif
 
+#if __GLASGOW_HASKELL__ < 710
+import Control.Applicative
+#endif
+
 import Data.Maybe
 import GHC.Exts
 
