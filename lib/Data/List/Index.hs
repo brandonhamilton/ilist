@@ -8,6 +8,9 @@ BangPatterns
 
 module Data.List.Index
 (
+  -- * Transformations
+  imap,
+
   -- * Folds
   ifoldr,
   ifoldr1,
@@ -35,7 +38,6 @@ import GHC.Exts
 
 {- Left to implement:
 
-imap
 iany
 iall
 iconcatMap
@@ -64,6 +66,12 @@ izipWithM
 izipWithM_
 -}
 
+
+imap :: (Int -> a -> b) -> [a] -> [b]
+imap f xs = build $ \c n ->
+  let go x cont i = f (I# i) x `c` cont (i +# 1#)
+  in foldr go (\_ -> n) xs 0#
+{-# INLINE imap #-}
 
 -- Using unboxed ints here doesn't seem to result in any benefit
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b

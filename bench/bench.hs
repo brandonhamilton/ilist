@@ -14,6 +14,18 @@ import Criterion.Main
 
 main :: IO ()
 main = defaultMain [
+  bgroup "imap" [
+      bgroup "consume" [
+          bench "rec" $ nf (\n -> sum $ imap_rec (+) [0..n]) 100000,
+          bench "fold" $ nf (\n -> sum $ imap_fold (+) [0..n]) 100000,
+          bench "zip" $ nf (\n -> sum $ imap_zip (+) [0..n]) 100000,
+          bench "our" $ nf (\n -> sum $ imap (+) [0..n]) 100000 ],
+      bgroup "full" [
+          bench "rec" $ nf (\n -> imap_rec (+) [0..n]) 100000,
+          bench "fold" $ nf (\n -> imap_fold (+) [0..n]) 100000,
+          bench "zip" $ nf (\n -> imap_zip (+) [0..n]) 100000,
+          bench "our" $ nf (\n -> imap (+) [0..n]) 100000 ] ],
+
   bgroup "ifilter" [
       bench "rec" $ nf (\n -> ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
       bench "fold" $ nf (\n -> ifilter_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
@@ -68,12 +80,28 @@ ifoldl'_fold :: (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl'_fold f z xs = foldl' (\g x !i -> f (g (i - 1)) i x) (const z) xs (length xs - 1)
 {-# INLINE ifoldl'_fold #-}
 
+imap_rec :: (Int -> a -> b) -> [a] -> [b]
+imap_rec p = go 0#
+  where
+    go _ [] = []
+    go i (x:xs) = p (I# i) x : go (i +# 1#) xs
+{-# INLINE imap_rec #-}
+
+imap_fold :: (Int -> a -> b) -> [a] -> [b]
+imap_fold f = ifoldr (\i x xs -> f i x : xs) []
+{-# INLINE imap_fold #-}
+
+imap_zip :: (Int -> a -> b) -> [a] -> [b]
+imap_zip p xs = map (uncurry p) (zip [0..] xs)
+{-# INLINE imap_zip #-}
+
 ifilter_rec :: (Int -> a -> Bool) -> [a] -> [a]
 ifilter_rec p = go 0#
   where
     go _ [] = []
     go i (x:xs) | p (I# i) x = x : go (i +# 1#) xs
                 | otherwise = go (i +# 1#) xs
+{-# INLINE ifilter_rec #-}
 
 ifilter_fold :: (Int -> a -> Bool) -> [a] -> [a]
 ifilter_fold p = ifoldr (\i x xs -> if p i x then x : xs else xs) []
