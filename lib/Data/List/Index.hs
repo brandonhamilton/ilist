@@ -9,6 +9,7 @@ module Data.List.Index
 (
   -- * Folds
   ifoldl, ifoldl',
+  ifoldl1, ifoldl1',
 )
 where
 
@@ -45,8 +46,6 @@ iforM_
 ifoldr
 ifoldr'
 ifoldr1
-ifoldl1
-ifoldl1'
 
 izipWith
 izipWith3
@@ -75,3 +74,14 @@ ifoldl' k z0 xs =
                    xs
                    (0, z0)
 {-# INLINE ifoldl' #-}
+
+ifoldl1 :: (Int -> a -> a -> a) -> [a] -> a
+ifoldl1 f (x:xs) = ifoldl f x xs
+ifoldl1 _ []     = errorEmptyList "ifoldl1"
+
+ifoldl1' :: (Int -> a -> a -> a) -> [a] -> a
+ifoldl1' f (x:xs) = ifoldl' f x xs
+ifoldl1' _ []     = errorEmptyList "ifoldl1'"
+
+errorEmptyList :: String -> a
+errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
