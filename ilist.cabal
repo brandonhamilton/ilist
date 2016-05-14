@@ -28,3 +28,13 @@ library
   ghc-options:         -O2 -Wall -fno-warn-unused-do-bind
   hs-source-dirs:      lib
   default-language:    Haskell2010
+
+benchmark bench
+  type:                exitcode-stdio-1.0
+  main-is:             bench.hs
+  build-depends:       base
+                     , criterion
+                     , ilist
+  ghc-options:         -O2 -Wall -fno-warn-unused-do-bind
+  hs-source-dirs:      bench
+  default-language:    Haskell2010
