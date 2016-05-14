@@ -5,8 +5,11 @@ MagicHash
 
 
 import Data.List
-import Data.List.Index
+import Control.Monad
+import Control.Monad.Trans.State.Lazy
 import GHC.Exts
+
+import Data.List.Index
 
 import Criterion
 import Criterion.Main
@@ -14,6 +17,7 @@ import Criterion.Main
 
 main :: IO ()
 main = defaultMain [
+
   bgroup "iall" [
       bgroup "full" [
           bench "zip" $ nf (\n -> iall_zip (==) [0..n]) 100000,
@@ -37,6 +41,18 @@ main = defaultMain [
           bench "fold" $ nf (\n -> imap_fold (+) [0..n]) 100000,
           bench "zip" $ nf (\n -> imap_zip (+) [0..n]) 100000,
           bench "our" $ nf (\n -> imap (+) [0..n]) 100000 ] ],
+
+  bgroup "imapM" [
+      bgroup "Just" [
+          bench "zip" $ nf (\n -> imapM_zip (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "zipWith" $ nf (\n -> imapM_zipWith (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "rec" $ nf (\n -> imapM_rec (\i x -> if i==x then Just i else Nothing) [0..n]) 100000,
+          bench "our" $ nf (\n -> imapM (\i x -> if i==x then Just i else Nothing) [0..n]) 100000 ],
+      bgroup "State" [
+          bench "zip" $ nf (\n -> flip runState [] $ imapM_zip (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "zipWith" $ nf (\n -> flip runState [] $ imapM_zipWith (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "rec" $ nf (\n -> flip runState [] $ imapM_rec (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
+          bench "our" $ nf (\n -> flip runState [] $ imapM (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000 ] ],
 
   bgroup "ifilter" [
       bench "rec" $ nf (\n -> ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
@@ -68,8 +84,26 @@ main = defaultMain [
       bench "fold" $ nf (\n -> ifoldl'_fold (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
       bench "our" $ nf (\n -> ifoldl' (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000 ] ]
 
+imapM_zip :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
+imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
+{-# INLINE imapM_zip #-}
+
+imapM_zipWith :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
+imapM_zipWith f xs = zipWithM f [0..] xs
+{-# INLINE imapM_zipWith #-}
+
+imapM_rec :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
+imapM_rec f as = go 0# as
+  where
+    go _ [] = return []
+    go i (x:xs) = do
+      x' <- f (I# i) x
+      xs' <- go (i +# 1#) xs
+      return (x':xs')
+{-# INLINE imapM_rec #-}
+
 iall_zip :: (Int -> a -> Bool) -> [a] -> Bool
-iall_zip p xs = all (uncurry p) (zip [0..] xs)
+iall_zip p xs = and (zipWith p [0..] xs)
 {-# INLINE iall_zip #-}
 
 iall_map :: (Int -> a -> Bool) -> [a] -> Bool
@@ -119,7 +153,7 @@ imap_fold f = ifoldr (\i x xs -> f i x : xs) []
 {-# INLINE imap_fold #-}
 
 imap_zip :: (Int -> a -> b) -> [a] -> [b]
-imap_zip p xs = map (uncurry p) (zip [0..] xs)
+imap_zip p xs = zipWith p [0..] xs
 {-# INLINE imap_zip #-}
 
 ifilter_rec :: (Int -> a -> Bool) -> [a] -> [a]

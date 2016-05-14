@@ -11,6 +11,10 @@ module Data.List.Index
   -- * Transformations
   imap,
 
+  -- * Monadic functions
+  imapM, iforM,
+  itraverse, ifor,
+
   -- * Special folds
   iall,
   iany,
@@ -43,6 +47,7 @@ import GHC.Exts
 {- Left to implement:
 
 iconcatMap
+ifoldMap
 ifoldrM
 ifoldlM
 imapAccumR
@@ -50,13 +55,9 @@ imapAccumL
 
 ipartition
 
-itraverse
 itraverse_
-ifor
 ifor_
-imapM
 imapM_
-iforM
 iforM_
 
 izipWith
@@ -84,6 +85,29 @@ iany :: (Int -> a -> Bool) -> [a] -> Bool
 iany p ls = foldr go (\_ -> False) ls 0#
   where go x r k = p (I# k) x || r (k +# 1#)
 {-# INLINE iany #-}
+
+imapM :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
+imapM f as = ifoldr k (return []) as
+  where
+    k i a r = do
+      x <- f i a
+      xs <- r
+      return (x:xs)
+{-# INLINE imapM #-}
+
+iforM :: Monad m => [a] -> (Int -> a -> m b) -> m [b]
+iforM = flip imapM
+{-# INLINE iforM #-}
+
+itraverse :: Applicative m => (Int -> a -> m b) -> [a] -> m [b]
+itraverse f as = ifoldr k (pure []) as
+  where
+    k i a r = (:) <$> f i a <*> r
+{-# INLINE itraverse #-}
+
+ifor :: Applicative m => [a] -> (Int -> a -> m b) -> m [b]
+ifor = flip itraverse
+{-# INLINE ifor #-}
 
 -- Using unboxed ints here doesn't seem to result in any benefit
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b

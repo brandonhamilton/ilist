@@ -1,8 +1,8 @@
 name:                ilist
 version:             0.1.0.0
-synopsis:            Functions for lists with access to index
+synopsis:            Optimised list functions with access to index
 description:
-  Functions for lists with access to index
+  Optimised list functions with access to index. They're faster than common idioms in all cases, and sometimes they fuse better as well.
 homepage:            http://github.com/aelve/ilist
 bug-reports:         http://github.com/aelve/ilist/issues
 license:             BSD3
@@ -35,6 +35,7 @@ benchmark bench
   build-depends:       base
                      , criterion
                      , ilist
+                     , transformers
   ghc-options:         -O2 -Wall -fno-warn-unused-do-bind
   hs-source-dirs:      bench
   default-language:    Haskell2010
