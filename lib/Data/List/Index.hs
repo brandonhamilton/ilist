@@ -23,9 +23,7 @@ module Data.List.Index
 
   -- * Folds
   ifoldr,
-  ifoldr1,
   ifoldl, ifoldl',
-  ifoldl1, ifoldl1',
 
   -- * Search
   ifilter,
@@ -50,7 +48,24 @@ import Control.Applicative
 import Data.Maybe
 import GHC.Exts
 
-{- Left to implement:
+{- Left to do:
+
+* a README with benchmarks (and lens comparisons)
+* say that there's no documentation for functions because see their versions in Data.List
+* write that the order for foldl is like this because it's like this in vector and containers
+* link to similar things in vector and containers
+* link from microlens to this
+* link from my site to this
+
+Functions
+~~~~~~~~~
+
+indexed
+replaceAt/setAt
+deleteAt
+insertAt
+modifyAt
+alterF or something
 
 iconcatMap
 ifoldMap
@@ -135,12 +150,16 @@ ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b
 ifoldr f z xs = foldr (\x g i -> f i x (g (i+1))) (const z) xs 0
 {-# INLINE ifoldr #-}
 
+{-
+
 ifoldr1 :: (Int -> a -> a -> a) -> [a] -> a
 ifoldr1 f = go 0#
   where go _ [x]    = x
         go i (x:xs) = f (I# i) x (go (i +# 1#) xs)
         go _ []     = errorEmptyList "ifoldr1"
 {-# INLINE [0] ifoldr1 #-}
+
+-}
 
 ifoldl :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl k z0 xs =
@@ -160,6 +179,8 @@ ifoldl' k z0 xs =
                    (0, z0)
 {-# INLINE ifoldl' #-}
 
+{-
+
 ifoldl1 :: (a -> Int -> a -> a) -> [a] -> a
 ifoldl1 f (x:xs) = ifoldl f x xs
 ifoldl1 _ []     = errorEmptyList "ifoldl1"
@@ -167,6 +188,8 @@ ifoldl1 _ []     = errorEmptyList "ifoldl1"
 ifoldl1' :: (a -> Int -> a -> a) -> [a] -> a
 ifoldl1' f (x:xs) = ifoldl' f x xs
 ifoldl1' _ []     = errorEmptyList "ifoldl1'"
+
+-}
 
 ifilter :: (Int -> a -> Bool) -> [a] -> [a]
 ifilter p ls = build $ \c n ->
@@ -188,5 +211,9 @@ ifindIndices p ls = build $ \c n ->
   in foldr go (\_ -> n) ls 0#
 {-# INLINE ifindIndices #-}
 
+{-
+
 errorEmptyList :: String -> a
 errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
+
+-}

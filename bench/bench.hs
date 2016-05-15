@@ -82,9 +82,13 @@ main = defaultMain [
       bench "zip" $ nf (\n -> ifoldr_zip (\i a x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
       bench "our" $ nf (\n -> ifoldr (\i a x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000 ],
 
+{-
+
   bgroup "ifoldr1" [
       bench "zip" $ nf (\n -> ifoldr1_zip (\i a x -> if rem x 16 == 0 then a+3*i else a+x) [0..n]) 100000,
       bench "our" $ nf (\n -> ifoldr1 (\i a x -> if rem x 16 == 0 then a+3*i else a+x) [0..n]) 100000 ],
+
+-}
 
   bgroup "ifoldl" [
       bench "zip" $ nf (\n -> ifoldl_zip (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
@@ -150,9 +154,11 @@ ifoldr_zip :: (Int -> a -> b -> b) -> b -> [a] -> b
 ifoldr_zip f a xs = foldr (\(i, x) acc -> f i x acc) a (zip [0..] xs)
 {-# INLINE ifoldr_zip #-}
 
+{-
 ifoldr1_zip :: (Int -> a -> a -> a) -> [a] -> a
 ifoldr1_zip f xs = snd (foldr1 (\(i, x) (j, y) -> (j, f i x y)) (zip [0..] xs))
 {-# INLINE ifoldr1_zip #-}
+-}
 
 ifoldl_zip :: (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl_zip f a xs = foldl (\acc (!i, x) -> f acc i x) a (zip [0..] xs)
