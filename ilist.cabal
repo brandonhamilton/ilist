@@ -31,7 +31,7 @@ library
 
 test-suite tests
   type:                exitcode-stdio-1.0
-  main-is:             tests.hs
+  main-is:             Main.hs
   build-depends:       base
                      , hspec
                      , ilist
@@ -42,7 +42,8 @@ test-suite tests
 
 benchmark bench
   type:                exitcode-stdio-1.0
-  main-is:             bench.hs
+  main-is:             Main.hs
+  other-modules:       Functions
   build-depends:       base
                      , criterion
                      , ilist

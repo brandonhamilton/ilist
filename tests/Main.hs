@@ -14,6 +14,7 @@ main = hspec $ do
   specialFolds
   folds
   search
+  zipping
 
 transformations :: Spec
 transformations = describe "transformations" $ do
@@ -147,3 +148,36 @@ search = describe "search" $ do
       ifindIndices (\i x -> i*2/=x) [0,2,4,6] `shouldBe` []
     specify "empty" $ do
       ifindIndices undefined [] `shouldBe` []
+
+zipping :: Spec
+zipping = describe "zipping" $ do
+  describe "strictness" $ do
+    let u :: a
+        u = undefined
+    specify "2" $ do
+      izipWith u [] u `shouldBe` []
+    specify "3" $ do
+      izipWith3 u []  u  u `shouldBe` []
+      izipWith3 u [u] [] u `shouldBe` []
+    specify "4" $ do
+      izipWith4 u []  u   u  u `shouldBe` []
+      izipWith4 u [u] []  u  u `shouldBe` []
+      izipWith4 u [u] [u] [] u `shouldBe` []
+    specify "5" $ do
+      izipWith5 u []  u   u   u  u `shouldBe` []
+      izipWith5 u [u] []  u   u  u `shouldBe` []
+      izipWith5 u [u] [u] []  u  u `shouldBe` []
+      izipWith5 u [u] [u] [u] [] u `shouldBe` []
+    specify "6" $ do
+      izipWith6 u []  u   u   u   u  u `shouldBe` []
+      izipWith6 u [u] []  u   u   u  u `shouldBe` []
+      izipWith6 u [u] [u] []  u   u  u `shouldBe` []
+      izipWith6 u [u] [u] [u] []  u  u `shouldBe` []
+      izipWith6 u [u] [u] [u] [u] [] u `shouldBe` []
+    specify "7" $ do
+      izipWith7 u []  u   u   u   u   u  u `shouldBe` []
+      izipWith7 u [u] []  u   u   u   u  u `shouldBe` []
+      izipWith7 u [u] [u] []  u   u   u  u `shouldBe` []
+      izipWith7 u [u] [u] [u] []  u   u  u `shouldBe` []
+      izipWith7 u [u] [u] [u] [u] []  u  u `shouldBe` []
+      izipWith7 u [u] [u] [u] [u] [u] [] u `shouldBe` []
