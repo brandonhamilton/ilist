@@ -23,7 +23,7 @@ imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
 {-# INLINE imapM_zip #-}
 
 imapM_vec :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
-imapM_vec f xs = V.toList <$> V.imapM f (V.fromList xs)
+imapM_vec f xs = liftM V.toList (V.imapM f (V.fromList xs))
 {-# INLINE imapM_vec #-}
 
 imapM_zipWith :: Monad m => (Int -> a -> m b) -> [a] -> m [b]

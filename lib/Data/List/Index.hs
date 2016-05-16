@@ -33,6 +33,11 @@ module Data.List.Index
 
   -- * Zipping
   izipWith,
+  izipWith3,
+  izipWith4,
+  izipWith5,
+  izipWith6,
+  izipWith7,
 )
 where
 
@@ -79,12 +84,6 @@ imapAccumL
 
 ipartition
 
-izipWith
-izipWith3
-izipWith4
-izipWith5
-izipWith6
-izipWith7
 izipWithM
 izipWithM_
 
@@ -226,8 +225,8 @@ errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
 -}
 
 izipWith :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
-izipWith f xs ys = build $ \c n ->
-  let go x y cont i = f (I# i) x y `c` cont (i +# 1#)
+izipWith fun xs ys = build $ \c n ->
+  let go x y cont i = fun (I# i) x y `c` cont (i +# 1#)
   in foldr2 go (\_ -> n) xs ys 0#
 {-# INLINE izipWith #-}
 
@@ -249,3 +248,53 @@ foldr2_left  k _z  x  r (y:ys) = k x y (r ys)
 "foldr2/left"   forall k z ys (g::forall b.(a->b->b)->b->b) .
                   foldr2 k z (build g) ys = g (foldr2_left  k z) (\_ -> z) ys
  #-}
+
+izipWith3
+  :: (Int -> a -> b -> c -> d)
+  -> [a] -> [b] -> [c] -> [d]
+izipWith3 fun = go 0#
+  where
+    go i (a:as) (b:bs) (c:cs) =
+      fun (I# i) a b c : go (i +# 1#) as bs cs
+    go _ _ _ _ = []
+{-# INLINE izipWith3 #-}
+
+izipWith4
+  :: (Int -> a -> b -> c -> d -> e)
+  -> [a] -> [b] -> [c] -> [d] -> [e]
+izipWith4 fun = go 0#
+  where
+    go i (a:as) (b:bs) (c:cs) (d:ds) =
+      fun (I# i) a b c d : go (i +# 1#) as bs cs ds
+    go _ _ _ _ _ = []
+{-# INLINE izipWith4 #-}
+
+izipWith5
+  :: (Int -> a -> b -> c -> d -> e -> f)
+  -> [a] -> [b] -> [c] -> [d] -> [e] -> [f]
+izipWith5 fun = go 0#
+  where
+    go i (a:as) (b:bs) (c:cs) (d:ds) (e:es) =
+      fun (I# i) a b c d e : go (i +# 1#) as bs cs ds es
+    go _ _ _ _ _ _ = []
+{-# INLINE izipWith5 #-}
+
+izipWith6
+  :: (Int -> a -> b -> c -> d -> e -> f -> g)
+  -> [a] -> [b] -> [c] -> [d] -> [e] -> [f] -> [g]
+izipWith6 fun = go 0#
+  where
+    go i (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs) =
+      fun (I# i) a b c d e f : go (i +# 1#) as bs cs ds es fs
+    go _ _ _ _ _ _ _ = []
+{-# INLINE izipWith6 #-}
+
+izipWith7
+  :: (Int -> a -> b -> c -> d -> e -> f -> g -> h)
+  -> [a] -> [b] -> [c] -> [d] -> [e] -> [f] -> [g] -> [h]
+izipWith7 fun = go 0#
+  where
+    go i (a:as) (b:bs) (c:cs) (d:ds) (e:es) (f:fs) (g:gs) =
+      fun (I# i) a b c d e f g : go (i +# 1#) as bs cs ds es fs gs
+    go _ _ _ _ _ _ _ _ = []
+{-# INLINE izipWith7 #-}

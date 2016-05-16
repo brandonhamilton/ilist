@@ -151,33 +151,35 @@ search = describe "search" $ do
 
 zipping :: Spec
 zipping = describe "zipping" $ do
-  describe "strictness" $ do
-    let u :: a
-        u = undefined
+  describe "basic" $ do
     specify "2" $ do
-      izipWith u [] u `shouldBe` []
+      izipWith (\i a b -> [i,a,b]) [1,2] [3,4]   `shouldBe` [[0,1,3],[1,2,4]]
+      izipWith (\i a b -> [i,a,b]) [1,2] [3,4,0] `shouldBe` [[0,1,3],[1,2,4]]
+      izipWith (\i a b -> [i,a,b]) [1,2,0] [3,4] `shouldBe` [[0,1,3],[1,2,4]]
     specify "3" $ do
-      izipWith3 u []  u  u `shouldBe` []
-      izipWith3 u [u] [] u `shouldBe` []
+      izipWith3 (\i a b c -> [i,a,b,c]) [1,2] [3,4] [5,6]
+        `shouldBe` [[0,1,3,5],[1,2,4,6]]
+      izipWith3 (\i a b c -> [i,a,b,c]) [1,2] [3,4] [5,6,0]
+        `shouldBe` [[0,1,3,5],[1,2,4,6]]
+      izipWith3 (\i a b c -> [i,a,b,c]) [1,2] [3,4,0] [5,6]
+        `shouldBe` [[0,1,3,5],[1,2,4,6]]
+      izipWith3 (\i a b c -> [i,a,b,c]) [1,2,0] [3,4] [5,6]
+        `shouldBe` [[0,1,3,5],[1,2,4,6]]
+  describe "strictness" $ do
+    -- The point of this test is that zipWith should stop when it sees an
+    -- empty list, even if other lists are undefined
+    let u :: Bool
+        u = undefined
+    let su :: [Bool]
+        su = undefined
+    let em :: [Bool]
+        em = []
+    specify "2" $ do
+      izipWith undefined em su `shouldBe` em
+    specify "3" $ do
+      izipWith3 undefined em  su su `shouldBe` em
+      izipWith3 undefined [u] em su `shouldBe` em
     specify "4" $ do
-      izipWith4 u []  u   u  u `shouldBe` []
-      izipWith4 u [u] []  u  u `shouldBe` []
-      izipWith4 u [u] [u] [] u `shouldBe` []
-    specify "5" $ do
-      izipWith5 u []  u   u   u  u `shouldBe` []
-      izipWith5 u [u] []  u   u  u `shouldBe` []
-      izipWith5 u [u] [u] []  u  u `shouldBe` []
-      izipWith5 u [u] [u] [u] [] u `shouldBe` []
-    specify "6" $ do
-      izipWith6 u []  u   u   u   u  u `shouldBe` []
-      izipWith6 u [u] []  u   u   u  u `shouldBe` []
-      izipWith6 u [u] [u] []  u   u  u `shouldBe` []
-      izipWith6 u [u] [u] [u] []  u  u `shouldBe` []
-      izipWith6 u [u] [u] [u] [u] [] u `shouldBe` []
-    specify "7" $ do
-      izipWith7 u []  u   u   u   u   u  u `shouldBe` []
-      izipWith7 u [u] []  u   u   u   u  u `shouldBe` []
-      izipWith7 u [u] [u] []  u   u   u  u `shouldBe` []
-      izipWith7 u [u] [u] [u] []  u   u  u `shouldBe` []
-      izipWith7 u [u] [u] [u] [u] []  u  u `shouldBe` []
-      izipWith7 u [u] [u] [u] [u] [u] [] u `shouldBe` []
+      izipWith4 undefined em  su  su su `shouldBe` em
+      izipWith4 undefined [u] em  su su `shouldBe` em
+      izipWith4 undefined [u] [u] em su `shouldBe` em
