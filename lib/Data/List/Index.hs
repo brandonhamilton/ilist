@@ -11,7 +11,7 @@ module Data.List.Index
   -- * Transformations
   imap,
 
-  -- * Monadic functions
+  -- * Monadic transformations
   imapM, iforM,
   imapM_, iforM_,
   itraverse, ifor,
@@ -38,6 +38,7 @@ module Data.List.Index
   izipWith5,
   izipWith6,
   izipWith7,
+  izipWithM, izipWithM_,
 )
 where
 
@@ -83,9 +84,6 @@ imapAccumR
 imapAccumL
 
 ipartition
-
-izipWithM
-izipWithM_
 
 itakeWhile
 idropWhile
@@ -298,3 +296,11 @@ izipWith7 fun = go 0#
       fun (I# i) a b c d e f g : go (i +# 1#) as bs cs ds es fs gs
     go _ _ _ _ _ _ _ _ = []
 {-# INLINE izipWith7 #-}
+
+izipWithM :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m [c]
+izipWithM f as bs = sequence (izipWith f as bs)
+{-# INLINE izipWithM #-}
+
+izipWithM_ :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m ()
+izipWithM_ f as bs = sequence_ (izipWith f as bs)
+{-# INLINE izipWithM_ #-}

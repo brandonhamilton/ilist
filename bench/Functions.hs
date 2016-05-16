@@ -179,3 +179,31 @@ izipWith_rec f = go 0#
 izipWith_vec :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
 izipWith_vec f xs ys = V.toList (V.izipWith f (V.fromList xs) (V.fromList ys))
 {-# INLINE izipWith_vec #-}
+
+izipWithM_vec :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m [c]
+izipWithM_vec f xs ys =
+  liftM V.toList (V.izipWithM f (V.fromList xs) (V.fromList ys))
+{-# INLINE izipWithM_vec #-}
+
+izipWithM_rec :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m [c]
+izipWithM_rec f xs ys = go 0# xs ys
+  where
+    go i (a:as) (b:bs) = do
+      c <- f (I# i) a b
+      cs <- go (i +# 1#) as bs
+      return (c:cs)
+    go _ _ _ = return []
+{-# INLINE izipWithM_rec #-}
+
+izipWithM__vec :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m ()
+izipWithM__vec f xs ys = V.izipWithM_ f (V.fromList xs) (V.fromList ys)
+{-# INLINE izipWithM__vec #-}
+
+izipWithM__rec :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m ()
+izipWithM__rec f xs ys = go 0# xs ys
+  where
+    go i (a:as) (b:bs) = do
+      f (I# i) a b
+      go (i +# 1#) as bs
+    go _ _ _ = return ()
+{-# INLINE izipWithM__rec #-}

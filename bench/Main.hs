@@ -118,4 +118,24 @@ main = defaultMain [
           bench "rec" $ nf (\n -> izipWith_rec (\i x y -> i+x+y) [0..n] [0..n]) 100000,
           bench "vec" $ nf (\n -> izipWith_vec (\i x y -> i+x+y) [0..n] [0..n]) 100000,
           bench "our" $ nf (\n -> izipWith (\i x y -> i+x+y) [0..n] [0..n]) 100000,
-          bench "non-indexed" $ nf (\n -> zipWith (\x y -> x+y) [0..n] [0..n]) (100000::Int) ] ] ]
+          bench "non-indexed" $ nf (\n -> zipWith (\x y -> x+y) [0..n] [0..n]) (100000::Int) ] ],
+
+  bgroup "izipWithM" [
+      bgroup "Just" [
+          bench "rec" $ nf (\n -> izipWithM_rec (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000,
+          bench "vec" $ nf (\n -> izipWithM_vec (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000,
+          bench "our" $ nf (\n -> izipWithM (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000 ],
+      bgroup "State" [
+          bench "rec" $ nf (\n -> flip runState [] $ izipWithM_rec (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000,
+          bench "vec" $ nf (\n -> flip runState [] $ izipWithM_vec (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000,
+          bench "our" $ nf (\n -> flip runState [] $ izipWithM (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000 ] ],
+
+  bgroup "izipWithM_" [
+      bgroup "Just" [
+          bench "rec" $ nf (\n -> izipWithM__rec (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000,
+          bench "vec" $ nf (\n -> izipWithM__vec (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000,
+          bench "our" $ nf (\n -> izipWithM_ (\i x y -> if i==x&&x==y then Just i else Nothing) [0..n] [0..n]) 100000 ],
+      bgroup "State" [
+          bench "rec" $ nf (\n -> flip runState [] $ izipWithM__rec (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000,
+          bench "vec" $ nf (\n -> flip runState [] $ izipWithM__vec (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000,
+          bench "our" $ nf (\n -> flip runState [] $ izipWithM_ (\i x y -> modify ((i+x+y):) >> return (i-x)) [0..n] [0..n]) 100000 ] ] ]
