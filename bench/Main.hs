@@ -9,6 +9,7 @@ import Control.Monad.Trans.State.Lazy
 import Criterion
 import Criterion.Main
 
+import Data.List
 import Data.List.Index
 import Functions
 
@@ -110,7 +111,8 @@ main = defaultMain [
 
   bgroup "imapAccumR" [
       bench "rec" $ nf (\n -> imapAccumR_rec (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000,
-      bench "our" $ nf (\n -> imapAccumR (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000 ],
+      bench "our" $ nf (\n -> imapAccumR (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000,
+      bench "non-indexed" $ nf (\n -> mapAccumR (\a x -> (2*a+a*x, x*2)) (0::Int) [0..n]) 100000 ],
 
   bgroup "izipWith" [
       bgroup "consume" [
