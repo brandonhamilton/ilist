@@ -29,6 +29,7 @@ module Data.List.Index
   itakeWhile,
   idropWhile,
   ifilter,
+  ipartition,
 
   -- * Search
   ifind,
@@ -86,8 +87,6 @@ ifoldrM
 ifoldlM
 imapAccumR
 imapAccumL
-
-ipartition
 -}
 
 
@@ -217,6 +216,14 @@ idropWhile p ls = go 0# ls
                 | otherwise  = x:xs
     go _ [] = []
 {-# INLINE idropWhile #-}
+
+ipartition :: (Int -> a -> Bool) -> [a] -> ([a],[a])
+ipartition p xs = ifoldr (iselect p) ([],[]) xs
+{-# INLINE ipartition #-}
+
+iselect :: (Int -> a -> Bool) -> Int -> a -> ([a], [a]) -> ([a], [a])
+iselect p i x ~(ts,fs) | p i x     = (x:ts,fs)
+                       | otherwise = (ts, x:fs)
 
 ifind :: (Int -> a -> Bool) -> [a] -> Maybe a
 ifind p = listToMaybe . ifilter p
