@@ -30,6 +30,9 @@ module Data.List.Index
   ifind,
   ifindIndex,
   ifindIndices,
+
+  -- * Zipping
+  izipWith,
 )
 where
 
@@ -81,8 +84,12 @@ izipWith3
 izipWith4
 izipWith5
 izipWith6
+izipWith7
 izipWithM
 izipWithM_
+
+itakeWhile
+idropWhile
 -}
 
 
@@ -217,3 +224,28 @@ errorEmptyList :: String -> a
 errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
 
 -}
+
+izipWith :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
+izipWith f xs ys = build $ \c n ->
+  let go x y cont i = f (I# i) x y `c` cont (i +# 1#)
+  in foldr2 go (\_ -> n) xs ys 0#
+{-# INLINE izipWith #-}
+
+-- Copied from GHC.List
+
+foldr2 :: (a -> b -> c -> c) -> c -> [a] -> [b] -> c
+foldr2 k z = go
+  where
+        go []    _ys     = z
+        go _xs   []      = z
+        go (x:xs) (y:ys) = k x y (go xs ys)
+{-# INLINE [0] foldr2 #-}
+
+foldr2_left :: (a -> b -> c -> d) -> d -> a -> ([b] -> c) -> [b] -> d
+foldr2_left _k  z _x _r []     = z
+foldr2_left  k _z  x  r (y:ys) = k x y (r ys)
+
+{-# RULES
+"foldr2/left"   forall k z ys (g::forall b.(a->b->b)->b->b) .
+                  foldr2 k z (build g) ys = g (foldr2_left  k z) (\_ -> z) ys
+ #-}
