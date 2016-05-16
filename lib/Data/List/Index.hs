@@ -20,6 +20,7 @@ module Data.List.Index
   -- * Special folds
   iall,
   iany,
+  iconcatMap,
 
   -- * Folds
   ifoldr,
@@ -81,7 +82,6 @@ insertAt
 modifyAt
 alterF or something
 
-iconcatMap
 ifoldMap
 ifoldrM
 ifoldlM
@@ -95,6 +95,10 @@ imap f xs = build $ \c n ->
   let go x cont i = f (I# i) x `c` cont (i +# 1#)
   in foldr go (\_ -> n) xs 0#
 {-# INLINE imap #-}
+
+iconcatMap :: (Int -> a -> [b]) -> [a] -> [b]
+iconcatMap f xs = build $ \c n ->
+  ifoldr (\i x b -> foldr c b (f i x)) n xs
 
 iall :: (Int -> a -> Bool) -> [a] -> Bool
 iall p ls = foldr go (\_ -> True) ls 0#
