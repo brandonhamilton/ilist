@@ -25,8 +25,12 @@ module Data.List.Index
   ifoldr,
   ifoldl, ifoldl',
 
-  -- * Search
+  -- * Sublists
+  itakeWhile,
+  idropWhile,
   ifilter,
+
+  -- * Search
   ifind,
   ifindIndex,
   ifindIndices,
@@ -84,9 +88,6 @@ imapAccumR
 imapAccumL
 
 ipartition
-
-itakeWhile
-idropWhile
 -}
 
 
@@ -201,6 +202,21 @@ ifilter p ls = build $ \c n ->
                | otherwise  = r (k +# 1#)
   in foldr go (\_ -> n) ls 0#
 {-# INLINE ifilter #-}
+
+itakeWhile :: (Int -> a -> Bool) -> [a] -> [a]
+itakeWhile p ls = build $ \c n ->
+  let go x r k | p (I# k) x = x `c` r (k +# 1#)
+               | otherwise  = n
+  in foldr go (\_ -> n) ls 0#
+{-# INLINE itakeWhile #-}
+
+idropWhile :: (Int -> a -> Bool) -> [a] -> [a]
+idropWhile p ls = go 0# ls
+  where
+    go i (x:xs) | p (I# i) x = go (i +# 1#) xs
+                | otherwise  = x:xs
+    go _ [] = []
+{-# INLINE idropWhile #-}
 
 ifind :: (Int -> a -> Bool) -> [a] -> Maybe a
 ifind p = listToMaybe . ifilter p

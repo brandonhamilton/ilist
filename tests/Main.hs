@@ -13,6 +13,7 @@ main = hspec $ do
   monadicFunctions
   specialFolds
   folds
+  sublists
   search
   zipping
 
@@ -115,8 +116,8 @@ folds = describe "folds" $ do
           evaluate (ifoldl' f 1 [undefined, undefined, undefined])
             `shouldReturn` 4
 
-search :: Spec
-search = describe "search" $ do
+sublists :: Spec
+sublists = describe "sublists" $ do
   describe "ifilter" $ do
     specify "all" $ do
       ifilter (\i x -> i*2==x) [0,2,4,6] `shouldBe` [0,2,4,6]
@@ -125,6 +126,28 @@ search = describe "search" $ do
     specify "empty" $ do
       ifilter undefined [] `shouldBe` ([] :: [Bool])
 
+  describe "itakeWhile" $ do
+    specify "all" $ do
+      itakeWhile (\i x -> i*2==x) [0,2,4,6] `shouldBe` [0,2,4,6]
+    specify "none" $ do
+      itakeWhile (\i x -> i*2/=x) [0,2,4,6] `shouldBe` []
+    specify "some" $ do
+      itakeWhile (\i x -> i*2==x) [0,2,5,6] `shouldBe` [0,2]
+    specify "empty" $ do
+      itakeWhile undefined [] `shouldBe` ([] :: [Bool])
+
+  describe "idropWhile" $ do
+    specify "all" $ do
+      idropWhile (\i x -> i*2==x) [0,2,4,6] `shouldBe` []
+    specify "none" $ do
+      idropWhile (\i x -> i*2/=x) [0,2,4,6] `shouldBe` [0,2,4,6]
+    specify "some" $ do
+      idropWhile (\i x -> i*2==x) [0,2,5,6] `shouldBe` [5,6]
+    specify "empty" $ do
+      idropWhile undefined [] `shouldBe` ([] :: [Bool])
+
+search :: Spec
+search = describe "search" $ do
   describe "ifind" $ do
     specify "found" $ do
       ifind (\i x -> i*2==x) [1,3,4,7] `shouldBe` Just 4
