@@ -11,20 +11,20 @@ module Data.List.Index
   -- * Transformations
   imap,
 
-  -- * Monadic transformations
-  imapM, iforM,
-  imapM_, iforM_,
-  itraverse, ifor,
-  itraverse_, ifor_,
+  -- * Folds
+  ifoldr,
+  ifoldl, ifoldl',
 
   -- * Special folds
   iall,
   iany,
   iconcatMap,
 
-  -- * Folds
-  ifoldr,
-  ifoldl, ifoldl',
+  -- * Monadic transformations
+  imapM, iforM,
+  imapM_, iforM_,
+  itraverse, ifor,
+  itraverse_, ifor_,
 
   -- * Sublists
   itakeWhile,
@@ -45,6 +45,9 @@ module Data.List.Index
   izipWith6,
   izipWith7,
   izipWithM, izipWithM_,
+
+  -- * Building lists
+  imapAccumR,
 )
 where
 
@@ -80,13 +83,21 @@ replaceAt/setAt
 deleteAt
 insertAt
 modifyAt
+alterAt?
 alterF or something
 
 ifoldMap
 ifoldrM
 ifoldlM
-imapAccumR
+
 imapAccumL
+iscanl
+iscanl'
+iscanl1
+iscanr
+iscanr1
+
+iiterate?
 -}
 
 
@@ -157,6 +168,18 @@ ifor_ = flip itraverse_
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b
 ifoldr f z xs = foldr (\x g i -> f i x (g (i+1))) (const z) xs 0
 {-# INLINE ifoldr #-}
+
+imapAccumR
+  :: (acc -> Int -> x -> (acc, y))
+  -> acc
+  -> [x]
+  -> (acc, [y])
+imapAccumR f z xs =
+  foldr (\x g i -> let (a, ys) = g (i+1)
+                       (a', y) = f a i x
+                   in  (a', y:ys))
+        (const (z, [])) xs 0
+{-# INLINE imapAccumR #-}
 
 {-
 

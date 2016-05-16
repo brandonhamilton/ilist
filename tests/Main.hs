@@ -16,6 +16,7 @@ main = hspec $ do
   sublists
   search
   zipping
+  buildingLists
 
 transformations :: Spec
 transformations = describe "transformations" $ do
@@ -206,3 +207,12 @@ zipping = describe "zipping" $ do
       izipWith4 undefined em  su  su su `shouldBe` em
       izipWith4 undefined [u] em  su su `shouldBe` em
       izipWith4 undefined [u] [u] em su `shouldBe` em
+
+buildingLists :: Spec
+buildingLists = describe "building lists" $ do
+  describe "imapAccumR" $ do
+    specify "basic" $ do
+      imapAccumR (\a i x -> (2*a+i*x, x*2)) 0 [1,2,3]
+        `shouldBe` (2*(2*(2*0+3*2)+2*1)+1*0,[2,4,6])
+    specify "empty" $ do
+      imapAccumR undefined 0 [] `shouldBe` (0::Int,[]::[Bool])

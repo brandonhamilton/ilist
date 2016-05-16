@@ -108,6 +108,10 @@ main = defaultMain [
       bench "vec" $ nf (\n -> ifoldl'_vec (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
       bench "our" $ nf (\n -> ifoldl' (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000 ],
 
+  bgroup "imapAccumR" [
+      bench "rec" $ nf (\n -> imapAccumR_rec (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000,
+      bench "our" $ nf (\n -> imapAccumR (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000 ],
+
   bgroup "izipWith" [
       bgroup "consume" [
           bench "rec" $ nf (\n -> sum $ izipWith_rec (\i x y -> i+x+y) [0..n] [0..n]) 100000,

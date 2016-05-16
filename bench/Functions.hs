@@ -207,3 +207,16 @@ izipWithM__rec f xs ys = go 0# xs ys
       go (i +# 1#) as bs
     go _ _ _ = return ()
 {-# INLINE izipWithM__rec #-}
+
+imapAccumR_rec
+  :: (acc -> Int -> x -> (acc, y))
+  -> acc
+  -> [x]
+  -> (acc, [y])
+imapAccumR_rec f z ls = go 0# ls
+  where
+    go i (x:xs) = let (a'',y ) = f a' (I# i) x
+                      (a', ys) = go (i +# 1#) xs
+                  in  (a'', y:ys)
+    go _ _ = (z, [])
+{-# INLINE imapAccumR_rec #-}
