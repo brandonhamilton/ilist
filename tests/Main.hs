@@ -1,6 +1,7 @@
 import Control.Exception
 import Control.Monad
 import Control.Monad.Trans.State.Lazy
+import Data.List
 
 import Data.List.Index
 
@@ -214,5 +215,19 @@ buildingLists = describe "building lists" $ do
     specify "basic" $ do
       imapAccumR (\a i x -> (2*a+i*x, x*2)) 0 [1,2,3]
         `shouldBe` (2*(2*(2*0+3*2)+2*1)+1*0,[2,4,6])
+    specify "non-indexed" $ do
+      imapAccumR (\a _ x -> (2*a+x, 2*x+a)) 0 [1,2,3::Int]
+        `shouldBe`
+       mapAccumR (\a   x -> (2*a+x, 2*x+a)) 0 [1,2,3]
     specify "empty" $ do
       imapAccumR undefined 0 [] `shouldBe` (0::Int,[]::[Bool])
+  describe "imapAccumL" $ do
+    specify "basic" $ do
+      imapAccumL (\a i x -> (2*a+i*x, x*2)) 0 [1,2,3]
+        `shouldBe` (2*(2*(2*0+1*0)+2*1)+3*2,[2,4,6])
+    specify "non-indexed" $ do
+      imapAccumL (\a _ x -> (2*a+x, 2*x+a)) 0 [1,2,3::Int]
+        `shouldBe`
+       mapAccumL (\a   x -> (2*a+x, 2*x+a)) 0 [1,2,3]
+    specify "empty" $ do
+      imapAccumL undefined 0 [] `shouldBe` (0::Int,[]::[Bool])

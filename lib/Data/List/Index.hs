@@ -48,6 +48,7 @@ module Data.List.Index
 
   -- * Building lists
   imapAccumR,
+  imapAccumL,
 )
 where
 
@@ -68,12 +69,14 @@ import GHC.Exts
 
 {- Left to do:
 
-* a README with benchmarks (and lens comparisons)
+* a README with benchmarks
 * say that there's no documentation for functions because see their versions in Data.List
 * write that the order for foldl is like this because it's like this in vector and containers
 * link to similar things in vector and containers
 * link from microlens to this
 * link from my site to this
+* ask someone whether I need rules that rewrite versions with build back into versions without build
+* add lens benchmarks
 
 Functions
 ~~~~~~~~~
@@ -90,7 +93,6 @@ ifoldMap
 ifoldrM
 ifoldlM
 
-imapAccumL
 iscanl
 iscanl'
 iscanl1
@@ -196,19 +198,35 @@ ifoldl :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl k z0 xs =
   foldr (\(v::a) (fn :: (Int, b) -> b) ->
           ONE_SHOT (\((!i)::Int, z::b) -> fn (i+1, k z i v)))
-                   (snd :: (Int, b) -> b)
-                   xs
-                   (0, z0)
+        (snd :: (Int, b) -> b)
+        xs
+        (0, z0)
 {-# INLINE ifoldl #-}
 
 ifoldl' :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl' k z0 xs =
   foldr (\(v::a) (fn :: (Int, b) -> b) ->
           ONE_SHOT (\((!i)::Int, z::b) -> z `seq` fn (i+1, k z i v)))
-                   (snd :: (Int, b) -> b)
-                   xs
-                   (0, z0)
+        (snd :: (Int, b) -> b)
+        xs
+        (0, z0)
 {-# INLINE ifoldl' #-}
+
+imapAccumL
+  :: (acc -> Int -> x -> (acc, y))
+  -> acc
+  -> [x]
+  -> (acc, [y])
+imapAccumL f z xs =
+  foldr (\(x::a) (r :: (Int,acc) -> (acc,[y])) ->
+          ONE_SHOT (\((!i)::Int, s::acc) ->
+            let (s', y)   = f s i x
+                (s'', ys) = r (i+1, s')
+            in (s'', y:ys)))
+        ((\(_, a) -> (a, [])) :: (Int,acc) -> (acc,[y]))
+        xs
+        (0, z)
+{-# INLINE imapAccumL #-}
 
 {-
 

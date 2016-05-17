@@ -220,3 +220,16 @@ imapAccumR_rec f z ls = go 0# ls
                   in  (a'', y:ys)
     go _ _ = (z, [])
 {-# INLINE imapAccumR_rec #-}
+
+imapAccumL_rec
+  :: (acc -> Int -> x -> (acc, y))
+  -> acc
+  -> [x]
+  -> (acc, [y])
+imapAccumL_rec f z ls = go z 0# ls
+  where
+    go a i (x:xs) = let (a', y ) = f a (I# i) x
+                        (a'',ys) = go a' (i +# 1#) xs
+                  in  (a'', y:ys)
+    go a _ _ = (a, [])
+{-# INLINE imapAccumL_rec #-}
