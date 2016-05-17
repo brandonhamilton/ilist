@@ -10,6 +10,7 @@ import Test.Hspec
 
 main :: IO ()
 main = hspec $ do
+  newFunctions
   transformations
   monadicFunctions
   specialFolds
@@ -18,6 +19,18 @@ main = hspec $ do
   search
   zipping
   buildingLists
+
+newFunctions :: Spec
+newFunctions = describe "new functions" $ do
+  describe "indexed" $ do
+    specify "basic" $ do
+      indexed [1,2,3] `shouldBe` [(0,1),(1,2),(2,3::Int)]
+    specify "empty" $ do
+      indexed [] `shouldBe` ([] :: [(Int,Bool)])
+    specify "undefined" $ do
+      take 1 (indexed (1:undefined)) `shouldBe` [(0,1::Int)]
+    specify "infinite" $ do
+      take 2 (indexed [1..]) `shouldBe` [(0,1),(1,2::Int)]
 
 transformations :: Spec
 transformations = describe "transformations" $ do

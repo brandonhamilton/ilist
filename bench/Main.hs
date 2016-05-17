@@ -17,6 +17,18 @@ import Functions
 main :: IO ()
 main = defaultMain [
 
+  bgroup "indexed" [
+      bgroup "consume" [
+          bench "zip" $ nf (\n -> length (indexed_zip [0..n])) (100000::Int),
+          bench "vec" $ nf (\n -> length (indexed_vec [0..n])) (100000::Int),
+          bench "rec" $ nf (\n -> length (indexed_rec [0..n])) (100000::Int),
+          bench "our" $ nf (\n -> length (indexed [0..n])) (100000::Int) ],
+      bgroup "full" [
+          bench "zip" $ nf (\n -> indexed_zip [0..n]) (100000::Int),
+          bench "vec" $ nf (\n -> indexed_vec [0..n]) (100000::Int),
+          bench "rec" $ nf (\n -> indexed_rec [0..n]) (100000::Int),
+          bench "our" $ nf (\n -> indexed [0..n]) (100000::Int) ] ],
+
   bgroup "iall" [
       bgroup "full" [
           bench "zip" $ nf (\n -> iall_zip (==) [0..n]) 100000,

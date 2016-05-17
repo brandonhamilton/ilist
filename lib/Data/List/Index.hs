@@ -8,36 +8,41 @@ BangPatterns
 
 module Data.List.Index
 (
-  -- * Transformations
+  -- * New functions
+  indexed,
+
+  -- * Variants of functions from "Data.List"
+
+  -- ** Transformations
   imap,
 
-  -- * Folds
+  -- ** Folds
   ifoldr,
   ifoldl, ifoldl',
 
-  -- * Special folds
+  -- ** Special folds
   iall,
   iany,
   iconcatMap,
 
-  -- * Monadic transformations
+  -- ** Monadic transformations
   imapM, iforM,
   imapM_, iforM_,
   itraverse, ifor,
   itraverse_, ifor_,
 
-  -- * Sublists
+  -- ** Sublists
   itakeWhile,
   idropWhile,
   ifilter,
   ipartition,
 
-  -- * Search
+  -- ** Search
   ifind,
   ifindIndex,
   ifindIndices,
 
-  -- * Zipping
+  -- ** Zipping
   izipWith,
   izipWith3,
   izipWith4,
@@ -46,7 +51,7 @@ module Data.List.Index
   izipWith7,
   izipWithM, izipWithM_,
 
-  -- * Building lists
+  -- ** Building lists
   imapAccumR,
   imapAccumL,
 )
@@ -78,10 +83,14 @@ import GHC.Exts
 * ask someone whether I need rules that rewrite versions with build back into versions without build
 * add lens benchmarks
 
+Docs
+~~~~
+
+indexed
+
 Functions
 ~~~~~~~~~
 
-indexed
 replaceAt/setAt
 deleteAt
 insertAt
@@ -102,6 +111,11 @@ iscanr1
 iiterate?
 -}
 
+indexed :: [a] -> [(Int, a)]
+indexed xs = build $ \c n ->
+  let go x cont i = (I# i, x) `c` cont (i +# 1#)
+  in foldr go (\_ -> n) xs 0#
+{-# INLINE indexed #-}
 
 imap :: (Int -> a -> b) -> [a] -> [b]
 imap f xs = build $ \c n ->

@@ -18,6 +18,21 @@ import Data.List.Index
 import Control.Monad
 
 
+indexed_zip :: [a] -> [(Int, a)]
+indexed_zip xs = zip [0..] xs
+{-# INLINE indexed_zip #-}
+
+indexed_vec :: [a] -> [(Int, a)]
+indexed_vec xs = V.toList (V.indexed (V.fromList xs))
+{-# INLINE indexed_vec #-}
+
+indexed_rec :: [a] -> [(Int, a)]
+indexed_rec xs = go 0# xs
+  where
+    go i (a:as) = (I# i, a) : go (i +# 1#) as
+    go _ _ = []
+{-# INLINE indexed_rec #-}
+
 imapM_zip :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
 imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
 {-# INLINE imapM_zip #-}
