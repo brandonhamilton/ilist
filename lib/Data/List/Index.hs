@@ -17,45 +17,46 @@ Note: a lot of these functions are available for other types (in their respectiv
 -}
 module Data.List.Index
 (
-  -- * New functions
+  -- * Original functions
   indexed,
 
-  -- * Variants of functions from "Data.List"
-  -- $variants
+  -- * Adapted functions from "Data.List"
+  -- $adapted
 
-  -- ** Actually useful functions
-  -- *** Maps
+  -- ** Maps
   imap,
-  imapM, imapM_, ifor_,
-  -- *** Folds
+  imapM, imapM_,
+  ifor, ifor_,
+  -- ** Folds
   ifoldr, ifoldl, ifoldl',
   iall, iany, iconcatMap,
-  -- *** Sublists
+  -- ** Sublists
   ifilter, ipartition,
   itakeWhile, idropWhile,
-  -- *** Zipping
+  -- ** Zipping
   izipWith,
   izipWithM, izipWithM_,
-  -- *** Search
+  -- ** Search
   ifind,
   ifindIndex,
   ifindIndices,
 
-  -- ** More zipping
+  -- * Less commonly used functions
+
+  -- ** Zipping
   izipWith3,
   izipWith4,
   izipWith5,
   izipWith6,
   izipWith7,
 
-  -- ** More monadic functions
+  -- ** Monadic functions
   iforM, iforM_,
   itraverse, itraverse_,
-  ifor,
   ifoldrM,
   ifoldlM,
   
-  -- ** More folds
+  -- ** Folds
   ifoldMap,
   imapAccumR,
   imapAccumL,
@@ -83,12 +84,7 @@ import GHC.Exts
 * a README with benchmarks
 * link from microlens to this
 * link from my site to this
-* ask someone whether I need rules that rewrite versions with build back into versions without build
-
-Docs
-~~~~
-
-indexed
+* add rules for rewriting back into build
 
 Functions
 ~~~~~~~~~
@@ -113,13 +109,19 @@ minIndex?
 maxIndex?
 -}
 
+{- |
+'indexed' pairs each element with its index.
+
+>>> indexed "hello"
+[(0,'h'),(1,'e'),(2,'l'),(3,'l'),(4,'o')]
+-}
 indexed :: [a] -> [(Int, a)]
 indexed xs = build $ \c n ->
   let go x cont i = (I# i, x) `c` cont (i +# 1#)
   in foldr go (\_ -> n) xs 0#
 {-# INLINE indexed #-}
 
-{- $variations
+{- $adapted
 
 These functions mimic their counterparts in "Data.List" – 'imap', for instance, works like 'map' but gives the index of the element to the modifying function.
 
