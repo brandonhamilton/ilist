@@ -1,8 +1,8 @@
 name:                ilist
 version:             0.1.0.0
-synopsis:            Optimised list functions with access to index
+synopsis:            Optimised list functions for doing index-related things
 description:
-  Optimised list functions with access to index. They're faster than common idioms in all cases, and sometimes they fuse better as well.
+  Optimised list functions for doing index-related things. They're faster than common idioms in all cases, and sometimes they fuse better as well.
 homepage:            http://github.com/aelve/ilist
 bug-reports:         http://github.com/aelve/ilist/issues
 license:             BSD3
@@ -47,6 +47,8 @@ benchmark bench
   build-depends:       base
                      , criterion
                      , ilist
+                     -- imapM_ is broken in 4.13.2
+                     , lens >= 4.13.2.1
                      , transformers
                      , vector
   ghc-options:         -O2 -Wall -fno-warn-unused-do-bind

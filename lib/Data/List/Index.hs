@@ -6,6 +6,15 @@ BangPatterns
   #-}
 
 
+{- |
+Note: a lot of these functions are available for other types (in their respective packages):
+
+  * @<http://hackage.haskell.org/package/vector/docs/Data-Vector.html Data.Vector>@ provides 'indexed' and lots of other functions beginning with “i”.
+
+  * @<http://hackage.haskell.org/package/containers/docs/Data-Map-Lazy.html Data.Map>@ and @<http://hackage.haskell.org/package/containers/docs/Data-Sequence.html Data.Sequence>@ provide similar functions, but use a different naming convention (e.g. @<http://hackage.haskell.org/package/containers/docs/Data-Map-Lazy.html#v:mapWithKey mapWithKey>@ for maps and @<http://hackage.haskell.org/package/containers/docs/Data-Sequence.html#v:foldrWithIndex foldrWithIndex>@ for sequences).
+
+  * <http://hackage.haskell.org/package/lens lens> provides several typeclasses for indexed functions that work on maps, lists, vectors, bytestrings, and so on (in @<http://hackage.haskell.org/package/lens/docs/Control-Lens-Indexed.html Control.Lens.Indexed>@), but unfortunately they are pretty slow for lists.
+-}
 module Data.List.Index
 (
   -- * New functions
@@ -77,11 +86,9 @@ import GHC.Exts
 * a README with benchmarks
 * say that there's no documentation for functions because see their versions in Data.List
 * write that the order for foldl is like this because it's like this in vector and containers
-* link to similar things in vector and containers
 * link from microlens to this
 * link from my site to this
 * ask someone whether I need rules that rewrite versions with build back into versions without build
-* add lens benchmarks
 
 Docs
 ~~~~
@@ -109,6 +116,10 @@ iscanr
 iscanr1
 
 iiterate?
+
+backpermute?
+minIndex?
+maxIndex?
 -}
 
 indexed :: [a] -> [(Int, a)]
