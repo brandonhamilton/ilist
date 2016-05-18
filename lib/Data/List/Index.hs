@@ -33,6 +33,7 @@ module Data.List.Index
   iall,
   iany,
   iconcatMap,
+  ifoldMap,
 
   -- ** Monadic transformations
   imapM, iforM,
@@ -79,6 +80,7 @@ import Control.Applicative
 #endif
 
 import Data.Maybe
+import Data.Monoid
 import GHC.Exts
 
 {- Left to do:
@@ -105,7 +107,6 @@ modifyAt
 alterAt?
 alterF or something
 
-ifoldMap
 ifoldrM
 ifoldlM
 
@@ -137,6 +138,12 @@ imap f xs = build $ \c n ->
 iconcatMap :: (Int -> a -> [b]) -> [a] -> [b]
 iconcatMap f xs = build $ \c n ->
   ifoldr (\i x b -> foldr c b (f i x)) n xs
+{-# INLINE iconcatMap #-}
+
+ifoldMap :: Monoid m => (Int -> a -> m) -> [a] -> m
+ifoldMap p ls = foldr go (\_ -> mempty) ls 0#
+  where go x r k = p (I# k) x <> r (k +# 1#)
+{-# INLINE ifoldMap #-}
 
 iall :: (Int -> a -> Bool) -> [a] -> Bool
 iall p ls = foldr go (\_ -> True) ls 0#
