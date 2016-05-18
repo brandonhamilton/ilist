@@ -146,7 +146,11 @@ deleteAt i ls
     go 0 (_:xs) = xs
     go n (x:xs) = x : go (n-1) xs
     go _ [] = []
-{-# NOINLINE [1] deleteAt #-}
+{-# INLINE deleteAt #-}
+
+{-
+
+David Feuer says that drop-like functions tend to have problems when implemented with folds: <http://ircbrowse.net/browse/haskell?id=22794495&timestamp=1463607633#t1463607633>. I haven't been able to observe this, but since Data.List defines drop/dropWhile/etc that don't fuse, let's do it here as well – just in case. The original version (that does fuse) is below.
 
 -- The plan is that if it does inline, it'll be fast; and if it doesn't
 -- inline, the former definition will be used and sharing will be preserved
@@ -162,6 +166,8 @@ deleteAtFB (I# i) c = \x r k ->
 "deleteAt"       [~1] forall i xs.    deleteAt i xs = build (\c n -> foldr (deleteAtFB i c) (\_ -> n) xs 0#)
 "deleteAtList"   [1]  forall i xs.    foldr (deleteAtFB i (:)) (\_ -> []) xs 0# = deleteAt i xs
   #-}
+
+-}
 
 {- $adapted
 

@@ -37,9 +37,11 @@ main = defaultMain [
   bgroup "deleteAt" [
       bgroup "consume" [
           bench "fold" $ nf (\n -> length (deleteAt_fold 1000 [0..n])) (100000::Int),
+          bench "rec" $ nf (\n -> length (deleteAt_rec 1000 [0..n])) (100000::Int),
           bench "our" $ nf (\n -> length (deleteAt 1000 [0..n])) (100000::Int) ],
       bgroup "full" [
           bench "fold" $ nf (\n -> deleteAt_fold 1000 [0..n]) (100000::Int),
+          bench "rec" $ nf (\n -> deleteAt_rec 1000 [0..n]) (100000::Int),
           bench "our" $ nf (\n -> deleteAt 1000 [0..n]) (100000::Int) ] ],
 
   bgroup "iall" [

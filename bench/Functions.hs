@@ -41,6 +41,16 @@ deleteAt_fold :: Int -> [a] -> [a]
 deleteAt_fold n = ifoldr (\i x s -> if n == i then s else x:s) []
 {-# INLINE deleteAt_fold #-}
 
+deleteAt_rec :: Int -> [a] -> [a]
+deleteAt_rec i ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 (_:xs) = xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# INLINE deleteAt_rec #-}
+
 imapM_zip :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
 imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
 {-# INLINE imapM_zip #-}
