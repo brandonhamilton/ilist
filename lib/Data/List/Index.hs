@@ -84,7 +84,10 @@ import GHC.Exts
 * a README with benchmarks
 * link from microlens to this
 * link from my site to this
-* add rules for rewriting back into build
+* write that the functions are optimised
+* link to benchmarks in the module description and package description
+* explain in a Note what's going on
+* check the core for ifilter/fold and ifilter/our
 
 Functions
 ~~~~~~~~~
@@ -116,10 +119,20 @@ maxIndex?
 [(0,'h'),(1,'e'),(2,'l'),(3,'l'),(4,'o')]
 -}
 indexed :: [a] -> [(Int, a)]
-indexed xs = build $ \c n ->
-  let go x cont i = (I# i, x) `c` cont (i +# 1#)
-  in foldr go (\_ -> n) xs 0#
-{-# INLINE indexed #-}
+indexed xs = go 0# xs
+  where
+    go i (a:as) = (I# i, a) : go (i +# 1#) as
+    go _ _ = []
+{-# NOINLINE [1] indexed #-}
+
+indexedFB :: ((Int, a) -> t -> t) -> a -> (Int# -> t) -> Int# -> t
+indexedFB c = \x cont i -> (I# i, x) `c` cont (i +# 1#)
+{-# INLINE [0] indexedFB #-}
+
+{-# RULES
+"indexed"       [~1] forall xs.    indexed xs = build (\c n -> foldr (indexedFB c) (\_ -> n) xs 0#)
+"indexedList"   [1]  forall xs.    foldr (indexedFB (:)) (\_ -> []) xs 0# = indexed xs
+  #-}
 
 {- $adapted
 
@@ -129,11 +142,25 @@ Note that left folds have the index argument /after/ the accumulator argument â€
 -}
 
 imap :: (Int -> a -> b) -> [a] -> [b]
-imap f xs = build $ \c n ->
-  let go x cont i = f (I# i) x `c` cont (i +# 1#)
-  in foldr go (\_ -> n) xs 0#
-{-# INLINE imap #-}
+imap f ls = go 0# ls
+  where
+    go i (x:xs) = f (I# i) x : go (i +# 1#) xs
+    go _ _ = []
+{-# NOINLINE [1] imap #-}
 
+imapFB
+  :: (b -> t -> t) -> (Int -> a -> b) -> a -> (Int# -> t) -> Int# -> t
+imapFB c f = \x r k -> f (I# k) x `c` r (k +# 1#)
+{-# INLINE [0] imapFB #-}
+
+{-# RULES
+"imap"       [~1] forall f xs.    imap f xs = build (\c n -> foldr (imapFB c f) (\_ -> n) xs 0#)
+"imapList"   [1]  forall f xs.    foldr (imapFB (:) f) (\_ -> []) xs 0# = imap f xs
+  #-}
+
+{-
+Note: we don't apply the *FB transformation to 'iconcatMap' because it uses 'ifoldr' instead of 'foldr', and 'ifoldr' might get inlined itself, and rewriting 'iconcatMap' with 'foldr' instead of 'ifoldr' is annoying. So, in theory it's a small optimisation possibility (in practice I'm not so sure, given that functions with 'build' don't seem to perform worse than functions without it).
+-}
 iconcatMap :: (Int -> a -> [b]) -> [a] -> [b]
 iconcatMap f xs = build $ \c n ->
   ifoldr (\i x b -> foldr c b (f i x)) n xs
@@ -287,18 +314,42 @@ ifoldl1' _ []     = errorEmptyList "ifoldl1'"
 -}
 
 ifilter :: (Int -> a -> Bool) -> [a] -> [a]
-ifilter p ls = build $ \c n ->
-  let go x r k | p (I# k) x = x `c` r (k +# 1#)
-               | otherwise  = r (k +# 1#)
-  in foldr go (\_ -> n) ls 0#
-{-# INLINE ifilter #-}
+ifilter p ls = go 0# ls
+  where
+    go i (x:xs) | p (I# i) x = x : go (i +# 1#) xs
+                | otherwise  = go (i +# 1#) xs
+    go _ _ = []
+{-# NOINLINE [1] ifilter #-}
+
+ifilterFB
+  :: (a -> t -> t) -> (Int -> a -> Bool) -> a -> (Int# -> t) -> Int# -> t
+ifilterFB c p = \x r k ->
+  if p (I# k) x then x `c` r (k +# 1#) else r (k +# 1#)
+{-# INLINE [0] ifilterFB #-}
+
+{-# RULES
+"ifilter"       [~1] forall p xs.    ifilter p xs = build (\c n -> foldr (ifilterFB c p) (\_ -> n) xs 0#)
+"ifilterList"   [1]  forall p xs.    foldr (ifilterFB (:) p) (\_ -> []) xs 0# = ifilter p xs
+  #-}
 
 itakeWhile :: (Int -> a -> Bool) -> [a] -> [a]
-itakeWhile p ls = build $ \c n ->
-  let go x r k | p (I# k) x = x `c` r (k +# 1#)
-               | otherwise  = n
-  in foldr go (\_ -> n) ls 0#
-{-# INLINE itakeWhile #-}
+itakeWhile p ls = go 0# ls
+  where
+    go i (x:xs) | p (I# i) x = x : go (i +# 1#) xs
+                | otherwise  = []
+    go _ _ = []
+{-# NOINLINE [1] itakeWhile #-}
+
+itakeWhileFB
+  :: (a -> t -> t) -> (Int -> a -> Bool) -> t -> a -> (Int# -> t) -> Int# -> t
+itakeWhileFB c p n = \x r k ->
+  if p (I# k) x then x `c` r (k +# 1#) else n
+{-# INLINE [0] itakeWhileFB #-}
+
+{-# RULES
+"itakeWhile"       [~1] forall p xs.    itakeWhile p xs = build (\c n -> foldr (itakeWhileFB c p n) (\_ -> n) xs 0#)
+"itakeWhileList"   [1]  forall p xs.    foldr (itakeWhileFB (:) p []) (\_ -> []) xs 0# = itakeWhile p xs
+  #-}
 
 idropWhile :: (Int -> a -> Bool) -> [a] -> [a]
 idropWhile p ls = go 0# ls
@@ -323,11 +374,23 @@ ifindIndex :: (Int -> a -> Bool) -> [a] -> Maybe Int
 ifindIndex p = listToMaybe . ifindIndices p
 
 ifindIndices :: (Int -> a -> Bool) -> [a] -> [Int]
-ifindIndices p ls = build $ \c n ->
-  let go x r k | p (I# k) x = I# k `c` r (k +# 1#)
-               | otherwise  = r (k +# 1#)
-  in foldr go (\_ -> n) ls 0#
-{-# INLINE ifindIndices #-}
+ifindIndices p ls = go 0# ls
+  where
+    go _ [] = []
+    go i (x:xs) | p (I# i) x = I# i : go (i +# 1#) xs
+                | otherwise  = go (i +# 1#) xs
+{-# NOINLINE [1] ifindIndices #-}
+
+ifindIndicesFB
+  :: (Int -> t -> t) -> (Int -> a -> Bool) -> a -> (Int# -> t) -> Int# -> t
+ifindIndicesFB c p = \x r k ->
+  if p (I# k) x then I# k `c` r (k +# 1#) else r (k +# 1#)
+{-# INLINE [0] ifindIndicesFB #-}
+
+{-# RULES
+"ifindIndices"       [~1] forall p xs.    ifindIndices p xs = build (\c n -> foldr (ifindIndicesFB c p) (\_ -> n) xs 0#)
+"ifindIndicesList"   [1]  forall p xs.    foldr (ifindIndicesFB (:) p) (\_ -> []) xs 0# = ifindIndices p xs
+  #-}
 
 {-
 
@@ -337,10 +400,21 @@ errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
 -}
 
 izipWith :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
-izipWith fun xs ys = build $ \c n ->
-  let go x y cont i = fun (I# i) x y `c` cont (i +# 1#)
-  in foldr2 go (\_ -> n) xs ys 0#
-{-# INLINE izipWith #-}
+izipWith fun xs ys = go 0# xs ys
+  where
+    go i (a:as) (b:bs) = fun (I# i) a b : go (i +# 1#) as bs
+    go _ _ _ = []
+{-# NOINLINE [1] izipWith #-}
+
+izipWithFB
+  :: (c -> t -> t) -> (Int -> a -> b -> c) -> a -> b -> (Int# -> t) -> Int# -> t
+izipWithFB c fun = \x y cont i -> fun (I# i) x y `c` cont (i +# 1#)
+{-# INLINE [0] izipWithFB #-}
+
+{-# RULES
+"izipWith"       [~1] forall f xs ys.    izipWith f xs ys = build (\c n -> foldr2 (izipWithFB c f) (\_ -> n) xs ys 0#)
+"izipWithList"   [1]  forall f xs ys.    foldr2 (izipWithFB (:) f) (\_ -> []) xs ys 0# = izipWith f xs ys
+  #-}
 
 -- Copied from GHC.List
 
