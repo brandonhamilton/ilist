@@ -20,6 +20,10 @@ module Data.List.Index
   -- * Original functions
   indexed,
   deleteAt,
+  setAt,
+  modifyAt,
+  updateAt,
+  insertAt,
 
   -- * Adapted functions from "Data.List"
   -- $adapted
@@ -93,11 +97,7 @@ import GHC.Exts
 Functions
 ~~~~~~~~~
 
-replaceAt/setAt
-insertAt
-modifyAt
-alterAt?
-alterF or something
+alterF or something?
 
 iscanl
 iscanl'
@@ -147,6 +147,72 @@ deleteAt i ls
     go n (x:xs) = x : go (n-1) xs
     go _ [] = []
 {-# INLINE deleteAt #-}
+
+{- |
+'setAt' sets the element at the index.
+
+If the index is negative or exceeds list length, the original list will be returned.
+-}
+setAt :: Int -> a -> [a] -> [a]
+setAt i a ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 (_:xs) = a : xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# INLINE setAt #-}
+
+{- |
+'modifyAt' applies a function to the element at the index.
+
+If the index is negative or exceeds list length, the original list will be returned.
+-}
+modifyAt :: Int -> (a -> a) -> [a] -> [a]
+modifyAt i f ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 (x:xs) = f x : xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# INLINE modifyAt #-}
+
+{- |
+'updateAt' applies a function to the element at the index, and then either replaces the element or deletes it (if the function has returned 'Nothing').
+
+If the index is negative or exceeds list length, the original list will be returned.
+-}
+updateAt :: Int -> (a -> Maybe a) -> [a] -> [a]
+updateAt i f ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 (x:xs) = case f x of
+      Nothing -> xs
+      Just x' -> x' : xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# INLINE updateAt #-}
+
+{- |
+'insertAt' inserts an element at the given position:
+
+@
+(insertAt i x xs) !! i == x
+@
+
+If the index is negative or exceeds list length, the original list will be returned. (If the index is equal to the list length, the insertion can be carried out.)
+-}
+insertAt :: Int -> a -> [a] -> [a]
+insertAt i a ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 xs = a : xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# INLINE insertAt #-}
 
 {-
 

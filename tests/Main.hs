@@ -47,6 +47,71 @@ newFunctions = describe "new functions" $ do
     specify "excessive" $ do
       deleteAt 5 [1,2] `shouldBe` [1,2::Int]
 
+  describe "setAt" $ do
+    specify "basic" $ do
+      setAt 0 8 [0,1,2] `shouldBe` [8,1,2::Int]
+      setAt 1 8 [0,1,2] `shouldBe` [0,8,2::Int]
+    specify "empty" $ do
+      setAt 0 undefined [] `shouldBe` ([]::[Bool])
+    specify "undefined" $ do
+      take 1 (setAt 0 8 (1:2:undefined)) `shouldBe` [8::Int]
+    specify "infinite" $ do
+      take 2 (setAt 1 8 [1..]) `shouldBe` [1,8::Int]
+    specify "negative" $ do
+      setAt (-1) undefined [1,2] `shouldBe` [1,2::Int]
+    specify "excessive" $ do
+      setAt 2 undefined [1,2] `shouldBe` [1,2::Int]
+
+  describe "modifyAt" $ do
+    specify "basic" $ do
+      modifyAt 0 succ [0,1,2] `shouldBe` [1,1,2::Int]
+      modifyAt 1 succ [0,1,2] `shouldBe` [0,2,2::Int]
+    specify "empty" $ do
+      modifyAt 0 undefined [] `shouldBe` ([]::[Bool])
+    specify "undefined" $ do
+      take 2 (modifyAt 0 succ (1:2:undefined)) `shouldBe` [2,2::Int]
+    specify "infinite" $ do
+      take 2 (modifyAt 1 succ [1..]) `shouldBe` [1,3::Int]
+    specify "negative" $ do
+      modifyAt (-1) undefined [1,2] `shouldBe` [1,2::Int]
+    specify "excessive" $ do
+      modifyAt 2 undefined [1,2] `shouldBe` [1,2::Int]
+
+  describe "updateAt" $ do
+    specify "modify" $ do
+      updateAt 0 (Just . succ) [0,1,2] `shouldBe` [1,1,2::Int]
+      updateAt 1 (Just . succ) [0,1,2] `shouldBe` [0,2,2::Int]
+    specify "delete" $ do
+      updateAt 0 (\_ -> Just 8) [0,1,2] `shouldBe` [8,1,2::Int]
+      updateAt 1 (\_ -> Just 8) [0,1,2] `shouldBe` [0,8,2::Int]
+    specify "empty" $ do
+      updateAt 0 undefined [] `shouldBe` ([]::[Bool])
+    specify "undefined" $ do
+      take 1 (updateAt 0 (\_ -> Just 8) (1:2:undefined)) `shouldBe` [8::Int]
+    specify "infinite" $ do
+      take 2 (updateAt 1 (\_ -> Nothing) [1..]) `shouldBe` [1,3::Int]
+    specify "negative" $ do
+      updateAt (-1) undefined [1,2] `shouldBe` [1,2::Int]
+    specify "excessive" $ do
+      updateAt 2 undefined [1,2] `shouldBe` [1,2::Int]
+
+  describe "insertAt" $ do
+    specify "basic" $ do
+      insertAt 0 8 [0,1,2] `shouldBe` [8,0,1,2::Int]
+      insertAt 1 8 [0,1,2] `shouldBe` [0,8,1,2::Int]
+    specify "end" $ do
+      insertAt 2 8 [1,2] `shouldBe` [1,2,8::Int]
+    specify "empty" $ do
+      insertAt 0 1 [] `shouldBe` [1::Int]
+    specify "undefined" $ do
+      take 3 (insertAt 0 8 (1:2:undefined)) `shouldBe` [8,1,2::Int]
+    specify "infinite" $ do
+      take 3 (insertAt 1 8 [1..]) `shouldBe` [1,8,2::Int]
+    specify "negative" $ do
+      insertAt (-1) 8 [1,2] `shouldBe` [1,2::Int]
+    specify "excessive" $ do
+      insertAt 3 8 [1,2] `shouldBe` [1,2::Int]
+
 transformations :: Spec
 transformations = describe "transformations" $ do
   describe "imap" $ do
