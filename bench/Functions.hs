@@ -33,6 +33,10 @@ indexed_rec xs = go 0# xs
     go _ _ = []
 {-# INLINE indexed_rec #-}
 
+indexed_fold :: [a] -> [(Int, a)]
+indexed_fold = ifoldr (\i c -> ((i,c):)) []
+{-# INLINE indexed_fold #-}
+
 imapM_zip :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
 imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
 {-# INLINE imapM_zip #-}

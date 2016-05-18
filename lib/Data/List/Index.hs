@@ -22,46 +22,40 @@ module Data.List.Index
 
   -- * Variants of functions from "Data.List"
 
-  -- ** Transformations
+  -- ** Actually useful functions
+  -- *** Maps
   imap,
-
-  -- ** Folds
-  ifoldr,
-  ifoldl, ifoldl',
-
-  -- ** Special folds
-  iall,
-  iany,
-  iconcatMap,
-  ifoldMap,
-
-  -- ** Monadic transformations
-  imapM, iforM,
-  imapM_, iforM_,
-  itraverse, ifor,
-  itraverse_, ifor_,
-
-  -- ** Sublists
-  itakeWhile,
-  idropWhile,
-  ifilter,
-  ipartition,
-
-  -- ** Search
+  imapM, imapM_, ifor_,
+  -- *** Folds
+  ifoldr, ifoldl, ifoldl',
+  iall, iany, iconcatMap,
+  -- *** Sublists
+  ifilter, ipartition,
+  itakeWhile, idropWhile,
+  -- *** Zipping
+  izipWith,
+  izipWithM, izipWithM_,
+  -- *** Search
   ifind,
   ifindIndex,
   ifindIndices,
 
-  -- ** Zipping
-  izipWith,
+  -- ** More zipping
   izipWith3,
   izipWith4,
   izipWith5,
   izipWith6,
   izipWith7,
-  izipWithM, izipWithM_,
 
-  -- ** Building lists
+  -- ** More monadic functions
+  iforM, iforM_,
+  itraverse, itraverse_,
+  ifor,
+  ifoldrM,
+  ifoldlM,
+  
+  -- ** More folds
+  ifoldMap,
   imapAccumR,
   imapAccumL,
 )
@@ -106,9 +100,6 @@ insertAt
 modifyAt
 alterAt?
 alterF or something
-
-ifoldrM
-ifoldlM
 
 iscanl
 iscanl'
@@ -203,6 +194,12 @@ ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b
 ifoldr f z xs = foldr (\x g i -> f i x (g (i+1))) (const z) xs 0
 {-# INLINE ifoldr #-}
 
+ifoldrM :: Monad m => (Int -> a -> b -> m b) -> b -> [a] -> m b
+ifoldrM f z xs = ifoldr k (return z) xs
+  where
+    k i a r = f i a =<< r
+{-# INLINE ifoldrM #-}
+
 imapAccumR
   :: (acc -> Int -> x -> (acc, y))
   -> acc
@@ -243,6 +240,12 @@ ifoldl' k z0 xs =
         xs
         (0, z0)
 {-# INLINE ifoldl' #-}
+
+ifoldlM :: Monad m => (b -> Int -> a -> m b) -> b -> [a] -> m b
+ifoldlM f z xs = ifoldl k (return z) xs
+  where
+    k a i r = do a' <- a; f a' i r
+{-# INLINE ifoldlM #-}
 
 imapAccumL
   :: (acc -> Int -> x -> (acc, y))
