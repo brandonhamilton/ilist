@@ -32,6 +32,21 @@ newFunctions = describe "new functions" $ do
     specify "infinite" $ do
       take 2 (indexed [1..]) `shouldBe` [(0,1),(1,2::Int)]
 
+  describe "deleteAt" $ do
+    specify "basic" $ do
+      deleteAt 0 [0,1,2] `shouldBe` [1,2::Int]
+      deleteAt 1 [0,1,2] `shouldBe` [0,2::Int]
+    specify "empty" $ do
+      deleteAt 0 [] `shouldBe` ([]::[Bool])
+    specify "undefined" $ do
+      take 1 (deleteAt 0 (1:2:undefined)) `shouldBe` [2::Int]
+    specify "infinite" $ do
+      take 2 (deleteAt 1 [1..]) `shouldBe` [1,3::Int]
+    specify "negative" $ do
+      deleteAt (-1) [1,2] `shouldBe` [1,2::Int]
+    specify "excessive" $ do
+      deleteAt 5 [1,2] `shouldBe` [1,2::Int]
+
 transformations :: Spec
 transformations = describe "transformations" $ do
   describe "imap" $ do

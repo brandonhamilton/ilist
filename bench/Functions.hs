@@ -37,6 +37,10 @@ indexed_fold :: [a] -> [(Int, a)]
 indexed_fold = ifoldr (\i c -> ((i,c):)) []
 {-# INLINE indexed_fold #-}
 
+deleteAt_fold :: Int -> [a] -> [a]
+deleteAt_fold n = ifoldr (\i x s -> if n == i then s else x:s) []
+{-# INLINE deleteAt_fold #-}
+
 imapM_zip :: Monad m => (Int -> a -> m b) -> [a] -> m [b]
 imapM_zip f xs = mapM (uncurry f) (zip [0..] xs)
 {-# INLINE imapM_zip #-}

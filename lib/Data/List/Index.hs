@@ -19,6 +19,7 @@ module Data.List.Index
 (
   -- * Original functions
   indexed,
+  deleteAt,
 
   -- * Adapted functions from "Data.List"
   -- $adapted
@@ -85,15 +86,14 @@ import GHC.Exts
 * link from microlens to this
 * link from my site to this
 * write that the functions are optimised
+* write which functions can be fused
 * link to benchmarks in the module description and package description
 * explain in a Note what's going on
-* check the core for ifilter/fold and ifilter/our
 
 Functions
 ~~~~~~~~~
 
 replaceAt/setAt
-deleteAt
 insertAt
 modifyAt
 alterAt?
@@ -108,8 +108,7 @@ iscanr1
 iiterate?
 
 backpermute?
-minIndex?
-maxIndex?
+minIndex/maxIndex?
 -}
 
 {- |
@@ -132,6 +131,36 @@ indexedFB c = \x cont i -> (I# i, x) `c` cont (i +# 1#)
 {-# RULES
 "indexed"       [~1] forall xs.    indexed xs = build (\c n -> foldr (indexedFB c) (\_ -> n) xs 0#)
 "indexedList"   [1]  forall xs.    foldr (indexedFB (:)) (\_ -> []) xs 0# = indexed xs
+  #-}
+
+{- |
+'deleteAt' deletes the element at an index.
+
+If the index is negative or exceeds list length, the original list will be returned.
+-}
+deleteAt :: Int -> [a] -> [a]
+deleteAt i ls
+  | i < 0 = ls
+  | otherwise = go i ls
+  where
+    go 0 (_:xs) = xs
+    go n (x:xs) = x : go (n-1) xs
+    go _ [] = []
+{-# NOINLINE [1] deleteAt #-}
+
+-- The plan is that if it does inline, it'll be fast; and if it doesn't
+-- inline, the former definition will be used and sharing will be preserved
+-- (i.e. if i == 0, it won't rebuild the whole list).
+deleteAtFB :: Int -> (a -> t -> t) -> a -> (Int# -> t) -> Int# -> t
+deleteAtFB (I# i) c = \x r k ->
+  case k ==# i of
+    0# -> x `c` r (k +# 1#)
+    _  -> r (k +# 1#)
+{-# INLINE [0] deleteAtFB #-}
+
+{-# RULES
+"deleteAt"       [~1] forall i xs.    deleteAt i xs = build (\c n -> foldr (deleteAtFB i c) (\_ -> n) xs 0#)
+"deleteAtList"   [1]  forall i xs.    foldr (deleteAtFB i (:)) (\_ -> []) xs 0# = deleteAt i xs
   #-}
 
 {- $adapted

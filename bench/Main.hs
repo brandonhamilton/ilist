@@ -34,6 +34,14 @@ main = defaultMain [
           bench "lens" $ nf (\n -> L.itoList [0..n]) (100000::Int),
           bench "our" $ nf (\n -> indexed [0..n]) (100000::Int) ] ],
 
+  bgroup "deleteAt" [
+      bgroup "consume" [
+          bench "fold" $ nf (\n -> length (deleteAt_fold 1000 [0..n])) (100000::Int),
+          bench "our" $ nf (\n -> length (deleteAt 1000 [0..n])) (100000::Int) ],
+      bgroup "full" [
+          bench "fold" $ nf (\n -> deleteAt_fold 1000 [0..n]) (100000::Int),
+          bench "our" $ nf (\n -> deleteAt 1000 [0..n]) (100000::Int) ] ],
+
   bgroup "iall" [
       bgroup "full" [
           bench "zip" $ nf (\n -> iall_zip (==) [0..n]) 100000,
