@@ -21,6 +21,7 @@ module Data.List.Index
   indexed,
 
   -- * Variants of functions from "Data.List"
+  -- $variants
 
   -- ** Actually useful functions
   -- *** Maps
@@ -80,8 +81,6 @@ import GHC.Exts
 {- Left to do:
 
 * a README with benchmarks
-* say that there's no documentation for functions because see their versions in Data.List
-* write that the order for foldl is like this because it's like this in vector and containers
 * link from microlens to this
 * link from my site to this
 * ask someone whether I need rules that rewrite versions with build back into versions without build
@@ -119,6 +118,13 @@ indexed xs = build $ \c n ->
   let go x cont i = (I# i, x) `c` cont (i +# 1#)
   in foldr go (\_ -> n) xs 0#
 {-# INLINE indexed #-}
+
+{- $variations
+
+These functions mimic their counterparts in "Data.List" – 'imap', for instance, works like 'map' but gives the index of the element to the modifying function.
+
+Note that left folds have the index argument /after/ the accumulator argument – that's the convention adopted by containers and vector (but not lens).
+-}
 
 imap :: (Int -> a -> b) -> [a] -> [b]
 imap f xs = build $ \c n ->
@@ -223,6 +229,9 @@ ifoldr1 f = go 0#
 
 -}
 
+{- |
+The index isn't the first argument of the function because that's the convention adopted by containers and vector (but not lens).
+-}
 ifoldl :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl k z0 xs =
   foldr (\(v::a) (fn :: (Int, b) -> b) ->
