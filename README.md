@@ -12,7 +12,7 @@ So, this library is intended to be the canonical place for index-related functio
 
 ## Why should you care
 
-You shouldn't, actually. This is a small library, it won't change anyone's life, and if you care about speed you probably shouldn't be using lists anyway (unless you keep your fingers crossed and hope that fusion will kick in). So, consider it more of a public service announcement – “hey, just in case you need them, index-related functions live here”.
+You shouldn't, actually. This is a small library, it won't change anyone's life, and if you care about speed you probably shouldn't be using lists anyway (unless you keep your fingers crossed and hope that fusion will kick in). So, consider it more of a public service announcement – “hey, just in case you ever need them, index-related functions live here”.
 
 ## Usage
 
