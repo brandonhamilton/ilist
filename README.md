@@ -6,7 +6,7 @@
 
 ## What is this
 
-This is a library with lots of list functions that are related to indices. It has often-reinvented `replaceAt`, `deleteAt`, etc, as well as indexed variants of functions from `Data.List` (e.g. `imap`, `ifilter`, `izipWith`). It has no dependencies, builds in about a second, and works on GHC from 7.4 to 8.0; the functions are optimised and benchmarked (for instance, the `zip [0..]` idiom is usually twice as slow, and sometimes 20× as slow).
+This is a library with lots of list functions that are related to indices. It has often-reinvented `deleteAt`, `setAt`, etc, as well as indexed variants of functions from `Data.List` (e.g. `imap`, `ifilter`, `izipWith`). It has no dependencies, builds in about a second, and works on GHC from 7.4 to 8.0; the functions are [optimised](https://github.com/aelve/ilist/blob/master/lib/Data/List/Index.hs) and benchmarked (for instance, the `zip [0..]` idiom is usually twice as slow, and sometimes 20× as slow).
 
 So, this library is intended to be the canonical place for index-related functions. You are encouraged to depend on this library instead of reinventing the functions, using `zip [0..]`, or using [lens](hackage.haskell.org/package/lens) when all you need is a simple `imap` or `ifoldr` (not to mention that lens variants are usually 2–10 times slower for lists).
 
@@ -16,8 +16,18 @@ You shouldn't, actually. This is a small library, it won't change anyone's life,
 
 ## Usage
 
+Unfortunately, `Data.List.Indexed` was taken by [IndexedList](http://hackage.haskell.org/package/IndexedList), which implements such exciting things as “counted lists” and “conic lists”. Nope, I'm not bitter at all. Okay, maybe a bit, even tho it's completely unfair to [IndexedList](http://hackage.haskell.org/package/IndexedList). Anyway:
+
 ~~~ haskell
 import Data.List.Index
 ~~~
 
-Unfortunately, `Data.List.Indexed` was taken by [IndexedList](http://hackage.haskell.org/package/IndexedList), which implements such exciting things as “counted lists” and “conic lists”. Nope, I'm not bitter at all. Okay, maybe a bit.
+And you can use functions from `Data.List` by prepending `i` to them. There's also `indexed :: [a] -> [(Int,a)]` and a family of functions for modifying the element at an index (`deleteAt`, `setAt`, `modifyAt`, `updateAt`, `insertAt`).
+
+Watch out – `ifoldl` has the index as the *second* parameter of the function:
+
+~~~ haskell
+ifoldl :: (b -> Int -> a -> b) -> b -> [a] -> b
+~~~
+
+That's the same convention that [containers](http://hackage.haskell.org/package/containers) and [vector](http://hackage.haskell.org/package/vector) use. Other functions pass the index as the first argument, as expected.
