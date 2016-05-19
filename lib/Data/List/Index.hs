@@ -86,13 +86,6 @@ import GHC.Exts
 
 {- Left to do:
 
-* a README with benchmarks
-* link from microlens to this
-* link from my site to this
-* write that the functions are optimised
-* link to benchmarks in the module description and package description
-* explain in a Note what's going on
-
 Functions
 ~~~~~~~~~
 
@@ -116,7 +109,7 @@ minIndex/maxIndex?
 >>> indexed "hello"
 [(0,'h'),(1,'e'),(2,'l'),(3,'l'),(4,'o')]
 
-/Subject to fusion/
+/Subject to fusion./
 -}
 indexed :: [a] -> [(Int, a)]
 indexed xs = go 0# xs
@@ -244,7 +237,7 @@ Note that left folds have the index argument /after/ the accumulator argument â€
 -}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 imap :: (Int -> a -> b) -> [a] -> [b]
 imap f ls = go 0# ls
@@ -277,7 +270,7 @@ ifoldMap p ls = foldr go (\_ -> mempty) ls 0#
 {-# INLINE ifoldMap #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 iall :: (Int -> a -> Bool) -> [a] -> Bool
 iall p ls = foldr go (\_ -> True) ls 0#
@@ -285,7 +278,7 @@ iall p ls = foldr go (\_ -> True) ls 0#
 {-# INLINE iall #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 iany :: (Int -> a -> Bool) -> [a] -> Bool
 iany p ls = foldr go (\_ -> False) ls 0#
@@ -316,7 +309,7 @@ ifor = flip itraverse
 {-# INLINE ifor #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 imapM_ :: Monad m => (Int -> a -> m b) -> [a] -> m ()
 imapM_ f as = ifoldr k (return ()) as
@@ -325,14 +318,14 @@ imapM_ f as = ifoldr k (return ()) as
 {-# INLINE imapM_ #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 iforM_ :: Monad m => [a] -> (Int -> a -> m b) -> m ()
 iforM_ = flip imapM_
 {-# INLINE iforM_ #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 itraverse_ :: Applicative m => (Int -> a -> m b) -> [a] -> m ()
 itraverse_ f as = ifoldr k (pure ()) as
@@ -341,7 +334,7 @@ itraverse_ f as = ifoldr k (pure ()) as
 {-# INLINE itraverse_ #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 ifor_ :: Applicative m => [a] -> (Int -> a -> m b) -> m ()
 ifor_ = flip itraverse_
@@ -384,7 +377,7 @@ ifoldr1 f = go 0#
 {- |
 The index isn't the first argument of the function because that's the convention adopted by containers and vector (but not lens).
 
-/Subject to fusion/
+/Subject to fusion./
 -}
 ifoldl :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl k z0 xs =
@@ -396,7 +389,7 @@ ifoldl k z0 xs =
 {-# INLINE ifoldl #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 ifoldl' :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl' k z0 xs =
@@ -408,7 +401,7 @@ ifoldl' k z0 xs =
 {-# INLINE ifoldl' #-}
 
 {- |
-/Subject to fusion/
+/Subject to fusion./
 -}
 ifoldlM :: Monad m => (b -> Int -> a -> m b) -> b -> [a] -> m b
 ifoldlM f z xs = ifoldl k (return z) xs
@@ -531,7 +524,7 @@ errorEmptyList fun = error ("Data.List.Index." ++ fun ++ ": empty list")
 -}
 
 {- |
-/Subject to fusion in the first argument/
+/Subject to fusion in the first argument./
 -}
 izipWith :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
 izipWith fun xs ys = go 0# xs ys
