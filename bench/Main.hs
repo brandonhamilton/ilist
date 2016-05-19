@@ -107,17 +107,32 @@ main = defaultMain [
           bench "our" $ nf (\n -> flip runState [] $ imapM_ (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000 ] ],
 
   bgroup "ifilter" [
-      bench "rec" $ nf (\n -> ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "fold" $ nf (\n -> ifilter_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "zip" $ nf (\n -> ifilter_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "vec" $ nf (\n -> ifilter_vec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "our" $ nf (\n -> ifilter (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000 ],
+      bgroup "consume" [
+          bench "rec" $ nf (\n -> sum $ ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "fold" $ nf (\n -> sum $ ifilter_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "zip" $ nf (\n -> sum $ ifilter_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "vec" $ nf (\n -> sum $ ifilter_vec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "our" $ nf (\n -> sum $ ifilter (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "non-indexed" $ nf (\n -> sum $ filter (\x -> rem x 5000 == 0) [0..n]) (100000::Int) ],
+      bgroup "full" [
+          bench "rec" $ nf (\n -> ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "fold" $ nf (\n -> ifilter_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "zip" $ nf (\n -> ifilter_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "vec" $ nf (\n -> ifilter_vec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "our" $ nf (\n -> ifilter (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "non-indexed" $ nf (\n -> filter (\x -> rem x 5000 == 0) [0..n]) (100000::Int) ] ],
 
   bgroup "ifindIndices" [
-      bench "rec" $ nf (\n -> ifindIndices_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "fold" $ nf (\n -> ifindIndices_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "zip" $ nf (\n -> ifindIndices_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
-      bench "our" $ nf (\n -> ifindIndices (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000 ],
+      bgroup "consume" [
+          bench "rec" $ nf (\n -> sum $ ifindIndices_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "fold" $ nf (\n -> sum $ ifindIndices_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "zip" $ nf (\n -> sum $ ifindIndices_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "our" $ nf (\n -> sum $ ifindIndices (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000 ],
+      bgroup "full" [
+          bench "rec" $ nf (\n -> ifindIndices_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "fold" $ nf (\n -> ifindIndices_fold (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "zip" $ nf (\n -> ifindIndices_zip (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,
+          bench "our" $ nf (\n -> ifindIndices (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000 ] ],
 
   bgroup "ifoldr" [
       bench "zip" $ nf (\n -> ifoldr_zip (\i x a -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
@@ -143,12 +158,20 @@ main = defaultMain [
       bench "non-indexed" $ nf (\n -> foldl (\a x -> if rem x 16 == 0 then a+3*x else a+x) 0 [0..n]) (100000::Int) ],
 
   bgroup "ifoldl'" [
-      bench "zip" $ nf (\n -> ifoldl'_zip (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
-      bench "fold" $ nf (\n -> ifoldl'_fold (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
-      bench "vec" $ nf (\n -> ifoldl'_vec (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
-      bench "lens" $ nf (\n -> L.ifoldl' (\i a x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
-      bench "our" $ nf (\n -> ifoldl' (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
-      bench "non-indexed" $ nf (\n -> foldl' (\a x -> if rem x 16 == 0 then a+3*x else a+x) 0 [0..n]) (100000::Int) ],
+      bgroup "if" [
+          bench "zip" $ nf (\n -> ifoldl'_zip (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
+          bench "fold" $ nf (\n -> ifoldl'_fold (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
+          bench "vec" $ nf (\n -> ifoldl'_vec (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
+          bench "lens" $ nf (\n -> L.ifoldl' (\i a x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
+          bench "our" $ nf (\n -> ifoldl' (\a i x -> if rem x 16 == 0 then a+3*i else a+x) 0 [0..n]) 100000,
+          bench "non-indexed" $ nf (\n -> foldl' (\a x -> if rem x 16 == 0 then a+3*x else a+x) 0 [0..n]) (100000::Int) ],
+      bgroup "plus" [
+          bench "zip" $ nf (\n -> ifoldl'_zip (\a i x -> a+i+x) 0 [0..n]) 100000,
+          bench "fold" $ nf (\n -> ifoldl'_fold (\a i x -> a+i+x) 0 [0..n]) 100000,
+          bench "vec" $ nf (\n -> ifoldl'_vec (\a i x -> a+i+x) 0 [0..n]) 100000,
+          bench "lens" $ nf (\n -> L.ifoldl' (\i a x -> a+i+x) 0 [0..n]) 100000,
+          bench "our" $ nf (\n -> ifoldl' (\a i x -> a+i+x) 0 [0..n]) 100000,
+          bench "non-indexed" $ nf (\n -> foldl' (\a x -> a+x) 0 [0..n]) (100000::Int) ] ],
 
   bgroup "imapAccumR" [
       bench "rec" $ nf (\n -> imapAccumR_rec (\a i x -> (2*a+i*x, x*2)) 0 [0..n]) 100000,
