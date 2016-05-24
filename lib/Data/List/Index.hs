@@ -80,7 +80,7 @@ import GHC.Base (oneShot)
 import Control.Applicative
 #endif
 
-import Data.Foldable
+import Data.Foldable (sequenceA_)
 import Data.Maybe
 import Data.Monoid
 import GHC.Exts
