@@ -80,6 +80,7 @@ import GHC.Base (oneShot)
 import Control.Applicative
 #endif
 
+import Data.Foldable
 import Data.Maybe
 import Data.Monoid
 import GHC.Exts
@@ -612,10 +613,10 @@ izipWith7 fun = go 0#
     go _ _ _ _ _ _ _ _ = []
 {-# INLINE izipWith7 #-}
 
-izipWithM :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m [c]
-izipWithM f as bs = sequence (izipWith f as bs)
+izipWithM :: Applicative f => (Int -> a -> b -> f c) -> [a] -> [b] -> f [c]
+izipWithM f as bs = sequenceA (izipWith f as bs)
 {-# INLINE izipWithM #-}
 
-izipWithM_ :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m ()
-izipWithM_ f as bs = sequence_ (izipWith f as bs)
+izipWithM_ :: Applicative f => (Int -> a -> b -> f c) -> [a] -> [b] -> f ()
+izipWithM_ f as bs = sequenceA_ (izipWith f as bs)
 {-# INLINE izipWithM_ #-}

@@ -1,5 +1,5 @@
 name:                ilist
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Optimised list functions for doing index-related things
 description:
   Optimised list functions for doing index-related things. They're faster than common idioms in all cases, and sometimes they fuse better as well.
