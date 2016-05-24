@@ -78,6 +78,7 @@ import GHC.Base (oneShot)
 
 #if __GLASGOW_HASKELL__ < 710
 import Control.Applicative
+import Data.Traversable (sequenceA)
 #endif
 
 import Data.Foldable (sequenceA_)
