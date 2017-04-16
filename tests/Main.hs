@@ -245,11 +245,13 @@ search :: Spec
 search = describe "search" $ do
   describe "ifind" $ do
     specify "found" $ do
-      ifind (\i x -> i*2==x) [1,3,4,7] `shouldBe` Just 4
+      ifind (\i x -> i*2==x) [1,3,4,7] `shouldBe` Just (2, 4)
+    specify "found twice" $ do
+      ifind (\i x -> i*2==x) [1,3,4,6] `shouldBe` Just (2, 4)
     specify "not found" $ do
       ifind (\i x -> i*2==x) [1,3,5,7] `shouldBe` Nothing
     specify "empty" $ do
-      ifind undefined [] `shouldBe` (Nothing :: Maybe Bool)
+      ifind undefined [] `shouldBe` (Nothing :: Maybe (Int, Bool))
 
   describe "ifindIndex" $ do
     specify "found" $ do

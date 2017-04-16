@@ -493,8 +493,13 @@ iselect :: (Int -> a -> Bool) -> Int -> a -> ([a], [a]) -> ([a], [a])
 iselect p i x ~(ts,fs) | p i x     = (x:ts,fs)
                        | otherwise = (ts, x:fs)
 
-ifind :: (Int -> a -> Bool) -> [a] -> Maybe a
-ifind p = listToMaybe . ifilter p
+ifind :: (Int -> a -> Bool) -> [a] -> Maybe (Int, a)
+ifind p ls = go 0# ls
+  where
+    go i (x:xs) | p (I# i) x = Just (I# i, x)
+                | otherwise  = go (i +# 1#) xs
+    go _ _ = Nothing
+{-# INLINE ifind #-}
 
 ifindIndex :: (Int -> a -> Bool) -> [a] -> Maybe Int
 ifindIndex p = listToMaybe . ifindIndices p
