@@ -43,7 +43,10 @@ install:
    fi
  - travis_retry cabal update -v
  - sed -i 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config
- - cabal install --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt
+ - if [ $GHCVER != 7.4.2 ] && [ $GHCVER != 7.6.3 ];
+     then cabal install --only-dependencies --enable-tests --enable-benchmarks --dry -v > installplan.txt;
+     else cabal install --only-dependencies --enable-tests --dry -v > installplan.txt;
+   fi
  - sed -i -e '1,/^Resolving /d' installplan.txt; cat installplan.txt
 
 # check whether current requested install-plan matches cached package-db snapshot
@@ -57,7 +60,10 @@ install:
      echo "cabal build-cache MISS";
      rm -rf $HOME/.cabsnap;
      mkdir -p $HOME/.ghc $HOME/.cabal/lib $HOME/.cabal/share $HOME/.cabal/bin;
-     cabal install --only-dependencies --enable-tests --enable-benchmarks;
+     if [ $GHCVER != 7.4.2 ] && [ $GHCVER != 7.6.3 ];
+       then cabal install --only-dependencies --enable-tests --enable-benchmarks;
+       else cabal install --only-dependencies --enable-tests;
+     fi
    fi
 
 # snapshot package-db on cache miss
@@ -75,10 +81,8 @@ script:
  - if [ -f configure.ac ]; then autoreconf -i; fi
  # building benchmarks fails on earlier GHCs for some reason
  - if [ $GHCVER != 7.4.2 ] && [ $GHCVER != 7.6.3 ];
-   then
-     cabal configure --enable-tests --enable-benchmarks;
-   else
-     cabal configure --enable-tests;
+     then cabal configure --enable-tests --enable-benchmarks;
+     else cabal configure --enable-tests;
    fi
  - cabal build --ghc-options=-Werror
  - cabal test
