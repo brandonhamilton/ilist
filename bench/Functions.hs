@@ -16,6 +16,7 @@ import GHC.Exts
 import Data.List
 import Data.List.Index
 import Control.Monad
+import qualified Control.Loop as Loop
 
 
 indexed_zip :: [a] -> [(Int, a)]
@@ -93,6 +94,14 @@ imapM__rec f as = go 0# as
       f (I# i) x
       go (i +# 1#) xs
 {-# INLINE imapM__rec #-}
+
+ireplicateM__loop :: Monad m => Int -> (Int -> m a) -> m ()
+ireplicateM__loop n f = Loop.numLoop 0 (n-1) (void . f)
+{-# INLINE ireplicateM__loop #-}
+
+ireplicateM__for :: Monad m => Int -> (Int -> m a) -> m ()
+ireplicateM__for n f = forM_ [0..n-1] f
+{-# INLINE ireplicateM__for #-}
 
 iall_zip :: (Int -> a -> Bool) -> [a] -> Bool
 iall_zip p xs = and (zipWith p [0..] xs)

@@ -136,7 +136,7 @@ monadicFunctions = describe "monadic functions" $ do
       specify "basic" $ do
         let f i x = modify ((i,x):) >> return (i-x)
         let (resA, stA) = runState (imapM     f [1,3..9]) []
-        let (resB, stB) = runState (itraverse f [1,3..9]) []
+            (resB, stB) = runState (itraverse f [1,3..9]) []
         resA `shouldBe` [0-1,1-3,2-5,3-7,4-9]
         resB `shouldBe` [0-1,1-3,2-5,3-7,4-9]
         stA `shouldBe` reverse (zip [0..4] [1,3..9])
@@ -154,9 +154,24 @@ monadicFunctions = describe "monadic functions" $ do
       specify "basic" $ do
         let f i x = modify ((i,x):) >> return (i-x)
         let stA = execState (imapM_     f [1,3..9]) []
-        let stB = execState (itraverse_ f [1,3..9]) []
+            stB = execState (itraverse_ f [1,3..9]) []
         stA `shouldBe` reverse (zip [0..4] [1,3..9])
         stB `shouldBe` reverse (zip [0..4] [1,3..9])
+
+  describe "ireplicateM" $ do
+    describe "State" $ do
+      specify "basic" $ do
+        let f i = modify (i:) >> return ((i+1)*2)
+        let (res, st) = runState (ireplicateM 5 f) []
+        res `shouldBe` [2,4..10]
+        st  `shouldBe` reverse [0..4]
+
+  describe "ireplicateM_" $ do
+    describe "State" $ do
+      specify "basic" $ do
+        let f i = modify (i:) >> return ((i+1)*2)
+        let st = execState (ireplicateM_ 5 f) []
+        st `shouldBe` reverse [0..4]
 
 specialFolds :: Spec
 specialFolds = describe "special folds" $ do

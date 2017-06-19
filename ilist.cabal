@@ -1,8 +1,8 @@
 name:                ilist
-version:             0.3.0.0
+version:             0.3.1.0
 synopsis:            Optimised list functions for doing index-related things
 description:
-  Optimised list functions for doing index-related things. They're faster than common idioms in all cases, and sometimes they fuse better as well.
+  Optimised list functions for doing index-related things. They're faster than common idioms in all cases, they avoid <https://ghc.haskell.org/trac/ghc/ticket/12620 space leaks>, and sometimes they fuse better as well.
 homepage:            http://github.com/aelve/ilist
 bug-reports:         http://github.com/aelve/ilist/issues
 license:             BSD3
@@ -49,6 +49,7 @@ benchmark bench
                      , ilist
                      -- imapM_ is broken in 4.13.2
                      , lens >= 4.13.2.1
+                     , loop
                      , transformers
                      , vector
   ghc-options:         -O2 -Wall -fno-warn-unused-do-bind

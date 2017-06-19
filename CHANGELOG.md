@@ -1,3 +1,7 @@
+# 0.3.1.0
+
+* Added `ireplicateM` and `ireplicateM_`.
+
 # 0.3.0.0
 
 * `ifind` now returns the index alongside with the value (same as in `lens`).

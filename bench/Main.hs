@@ -106,6 +106,16 @@ main = defaultMain [
           bench "lens" $ nf (\n -> flip runState [] $ L.imapM_ (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000,
           bench "our" $ nf (\n -> flip runState [] $ imapM_ (\i x -> modify ((i+x):) >> return (i-x)) [0..n]) 100000 ] ],
 
+  bgroup "ireplicateM_" [
+      bgroup "Just" [
+          bench "loop" $ nf (\n -> ireplicateM__loop n (\i -> if i<50000 then Just i else Nothing)) 100000,
+          bench "for" $ nf (\n -> ireplicateM__for n (\i -> if i<50000 then Just i else Nothing)) 100000,
+          bench "our" $ nf (\n -> ireplicateM_ n (\i -> if i<50000 then Just i else Nothing)) 100000 ],
+      bgroup "State" [
+          bench "loop" $ nf (\n -> flip runState 0 $ ireplicateM__loop n (\i -> modify' (i+))) 100000,
+          bench "for" $ nf (\n -> flip runState 0 $ ireplicateM__for n (\i -> modify' (i+))) 100000,
+          bench "our" $ nf (\n -> flip runState 0 $ ireplicateM_ n (\i -> modify' (i+))) 100000 ] ],
+
   bgroup "ifilter" [
       bgroup "consume" [
           bench "rec" $ nf (\n -> sum $ ifilter_rec (\i x -> rem (i+x) 5000 == 0) [0..n]) 100000,

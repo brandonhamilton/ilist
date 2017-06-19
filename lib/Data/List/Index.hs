@@ -58,6 +58,7 @@ module Data.List.Index
   -- ** Monadic functions
   iforM, iforM_,
   itraverse, itraverse_,
+  ireplicateM, ireplicateM_,
   ifoldrM,
   ifoldlM,
   
@@ -341,6 +342,31 @@ itraverse_ f as = ifoldr k (pure ()) as
 ifor_ :: Applicative m => [a] -> (Int -> a -> m b) -> m ()
 ifor_ = flip itraverse_
 {-# INLINE ifor_ #-}
+
+{- |
+Perform a given action @n@ times. Behaves like @for_ [0..n-1]@, but avoids <https://ghc.haskell.org/trac/ghc/ticket/12620 space leaks>.
+
+If you want more complicated loops (e.g. counting downwards), consider the <https://hackage.haskell.org/package/loop loop> package.
+-}
+ireplicateM :: Applicative m => Int -> (Int -> m a) -> m [a]
+ireplicateM cnt f = go 0
+  where
+    go !i | i >= cnt  = pure []
+          | otherwise = (:) <$> f i <*> go (i + 1)
+{-# INLINE ireplicateM #-}
+
+{- |
+NB. This function intentionally uses 'Monad' even though 'Applicative' is enough. That's because the @transformers@ package didn't have an optimized definition of ('*>') for 'StateT' prior to 0.5.3.0, so for a common case of 'StateT' this function would be 40 times slower with the 'Applicative' constraint.
+-}
+ireplicateM_ :: Monad m => Int -> (Int -> m a) -> m ()
+ireplicateM_ cnt f = if cnt > 0 then go 0 else return ()
+  where
+    -- this is 30% faster for Maybe than the simpler
+    --     go i | i == cnt  = return ()
+    --          | otherwise = f i >> go (i + 1)
+    cnt_ = cnt-1
+    go !i = if i == cnt_ then f i >> return () else f i >> go (i + 1)
+{-# INLINE ireplicateM_ #-}
 
 -- Using unboxed ints here doesn't seem to result in any benefit
 ifoldr :: (Int -> a -> b -> b) -> b -> [a] -> b
