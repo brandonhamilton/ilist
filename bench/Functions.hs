@@ -1,6 +1,7 @@
 {-# LANGUAGE
 MagicHash,
-BangPatterns
+BangPatterns,
+CPP
   #-}
 
 
@@ -95,7 +96,13 @@ imapM__rec f as = go 0# as
       go (i +# 1#) xs
 {-# INLINE imapM__rec #-}
 
-ireplicateM__loop :: (Monad m, Functor m) => Int -> (Int -> m a) -> m ()
+#if __GLASGOW_HASKELL__ < 710
+ireplicateM__loop
+  :: (Monad m, Functor m) => Int -> (Int -> m a) -> m ()
+#else
+ireplicateM__loop
+  :: Monad m => Int -> (Int -> m a) -> m ()
+#endif
 ireplicateM__loop n f = Loop.numLoop 0 (n-1) (void . f)
 {-# INLINE ireplicateM__loop #-}
 
