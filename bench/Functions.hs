@@ -95,7 +95,7 @@ imapM__rec f as = go 0# as
       go (i +# 1#) xs
 {-# INLINE imapM__rec #-}
 
-ireplicateM__loop :: Monad m => Int -> (Int -> m a) -> m ()
+ireplicateM__loop :: (Monad m, Functor m) => Int -> (Int -> m a) -> m ()
 ireplicateM__loop n f = Loop.numLoop 0 (n-1) (void . f)
 {-# INLINE ireplicateM__loop #-}
 
