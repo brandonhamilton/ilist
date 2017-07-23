@@ -1,8 +1,6 @@
-{-# LANGUAGE
-MagicHash,
-BangPatterns,
-CPP
-  #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE CPP #-}
 
 
 -- All these functions have to be in a separate module because otherwise

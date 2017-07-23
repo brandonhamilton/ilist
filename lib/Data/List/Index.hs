@@ -1,9 +1,7 @@
-{-# LANGUAGE
-CPP,
-MagicHash,
-ScopedTypeVariables,
-BangPatterns
-  #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE MagicHash #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE BangPatterns #-}
 
 
 {- |

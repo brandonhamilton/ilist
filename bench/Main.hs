@@ -1,7 +1,5 @@
-{-# LANGUAGE
-BangPatterns,
-MagicHash
-  #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE MagicHash #-}
 
 
 import Control.Monad.Trans.State.Lazy
