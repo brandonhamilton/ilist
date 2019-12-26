@@ -1,10 +1,12 @@
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE MagicHash #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE BangPatterns #-}
-
+{-# LANGUAGE MagicHash    #-}
 
 {- |
+Copyright:  (c) 2016-2019 Artyom Kazak
+            (c) 2019-2020 Kowainik
+SPDX-License-Identifier: MPL-2.0
+Maintainer: Kowainik <xrom.xkov@gmail.com>
+
 Note: a lot of these functions are available for other types (in their respective packages):
 
   * @<http://hackage.haskell.org/package/vector/docs/Data-Vector.html Data.Vector>@ provides 'indexed' and lots of other functions beginning with “i”.
@@ -13,77 +15,72 @@ Note: a lot of these functions are available for other types (in their respectiv
 
   * <http://hackage.haskell.org/package/lens lens> provides several typeclasses for indexed functions that work on maps, lists, vectors, bytestrings, and so on (in @<http://hackage.haskell.org/package/lens/docs/Control-Lens-Indexed.html Control.Lens.Indexed>@), but unfortunately they are pretty slow for lists.
 -}
+
 module Data.List.Index
-(
-  -- * Original functions
-  indexed,
-  deleteAt,
-  setAt,
-  modifyAt,
-  updateAt,
-  insertAt,
+    ( -- * Original functions
+      indexed
+    , deleteAt
+    , setAt
+    , modifyAt
+    , updateAt
+    , insertAt
 
-  -- * Adapted functions from "Data.List"
-  -- $adapted
+      -- * Adapted functions from "Data.List"
+      -- $adapted
+      -- ** Maps
+    , imap
+    , imapM
+    , imapM_
+    , ifor
+    , ifor_
+      -- ** Folds
+    , ifoldr
+    , ifoldl
+    , ifoldl'
+    , iall
+    , iany
+    , iconcatMap
+      -- ** Sublists
+    , ifilter
+    , ipartition
+    , itakeWhile
+    , idropWhile
+      -- ** Zipping
+    , izipWith
+    , izipWithM
+    , izipWithM_
+      -- ** Search
+    , ifind
+    , ifindIndex
+    , ifindIndices
 
-  -- ** Maps
-  imap,
-  imapM, imapM_,
-  ifor, ifor_,
-  -- ** Folds
-  ifoldr, ifoldl, ifoldl',
-  iall, iany, iconcatMap,
-  -- ** Sublists
-  ifilter, ipartition,
-  itakeWhile, idropWhile,
-  -- ** Zipping
-  izipWith,
-  izipWithM, izipWithM_,
-  -- ** Search
-  ifind,
-  ifindIndex,
-  ifindIndices,
-
-  -- * Less commonly used functions
-
-  -- ** Zipping
-  izipWith3,
-  izipWith4,
-  izipWith5,
-  izipWith6,
-  izipWith7,
-
-  -- ** Monadic functions
-  iforM, iforM_,
-  itraverse, itraverse_,
-  ireplicateM, ireplicateM_,
-  ifoldrM,
-  ifoldlM,
-  
-  -- ** Folds
-  ifoldMap,
-  imapAccumR,
-  imapAccumL,
-)
-where
-
-
-#if __GLASGOW_HASKELL__ >= 710
-import GHC.Base (oneShot)
-#define ONE_SHOT oneShot
-#else
-#define ONE_SHOT
-#endif
-
-#if __GLASGOW_HASKELL__ < 710
-import Control.Applicative
-import Data.Traversable (sequenceA)
-#endif
+      -- * Less commonly used functions
+      -- ** Zipping
+    , izipWith3
+    , izipWith4
+    , izipWith5
+    , izipWith6
+    , izipWith7
+      -- ** Monadic functions
+    , iforM
+    , iforM_
+    , itraverse
+    , itraverse_
+    , ireplicateM
+    , ireplicateM_
+    , ifoldrM
+    , ifoldlM
+      -- ** Folds
+    , ifoldMap
+    , imapAccumR
+    , imapAccumL
+    ) where
 
 import Data.Foldable (sequenceA_)
-import Data.Maybe
-import Data.Monoid
-import GHC.Exts
+import Data.Maybe (listToMaybe)
+import Data.Semigroup (Semigroup ((<>)))
+import GHC.Base (Int (..), Int#, build, oneShot, (+#))
+
 
 {- Left to do:
 
@@ -116,7 +113,7 @@ indexed :: [a] -> [(Int, a)]
 indexed xs = go 0# xs
   where
     go i (a:as) = (I# i, a) : go (i +# 1#) as
-    go _ _ = []
+    go _ _      = []
 {-# NOINLINE [1] indexed #-}
 
 indexedFB :: ((Int, a) -> t -> t) -> a -> (Int# -> t) -> Int# -> t
@@ -140,7 +137,7 @@ deleteAt i ls
   where
     go 0 (_:xs) = xs
     go n (x:xs) = x : go (n-1) xs
-    go _ [] = []
+    go _ []     = []
 {-# INLINE deleteAt #-}
 
 {- |
@@ -155,7 +152,7 @@ setAt i a ls
   where
     go 0 (_:xs) = a : xs
     go n (x:xs) = x : go (n-1) xs
-    go _ [] = []
+    go _ []     = []
 {-# INLINE setAt #-}
 
 {- |
@@ -170,7 +167,7 @@ modifyAt i f ls
   where
     go 0 (x:xs) = f x : xs
     go n (x:xs) = x : go (n-1) xs
-    go _ [] = []
+    go _ []     = []
 {-# INLINE modifyAt #-}
 
 {- |
@@ -204,9 +201,9 @@ insertAt i a ls
   | i < 0 = ls
   | otherwise = go i ls
   where
-    go 0 xs = a : xs
+    go 0 xs     = a : xs
     go n (x:xs) = x : go (n-1) xs
-    go _ [] = []
+    go _ []     = []
 {-# INLINE insertAt #-}
 
 {-
@@ -244,7 +241,7 @@ imap :: (Int -> a -> b) -> [a] -> [b]
 imap f ls = go 0# ls
   where
     go i (x:xs) = f (I# i) x : go (i +# 1#) xs
-    go _ _ = []
+    go _ _      = []
 {-# NOINLINE [1] imap #-}
 
 imapFB
@@ -265,7 +262,7 @@ iconcatMap f xs = build $ \c n ->
   ifoldr (\i x b -> foldr c b (f i x)) n xs
 {-# INLINE iconcatMap #-}
 
-ifoldMap :: Monoid m => (Int -> a -> m) -> [a] -> m
+ifoldMap :: (Semigroup m, Monoid m) => (Int -> a -> m) -> [a] -> m
 ifoldMap p ls = foldr go (\_ -> mempty) ls 0#
   where go x r k = p (I# k) x <> r (k +# 1#)
 {-# INLINE ifoldMap #-}
@@ -408,7 +405,7 @@ The index isn't the first argument of the function because that's the convention
 ifoldl :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl k z0 xs =
   foldr (\(v::a) (fn :: (Int, b) -> b) ->
-          ONE_SHOT (\((!i)::Int, z::b) -> fn (i+1, k z i v)))
+          oneShot (\((!i)::Int, z::b) -> fn (i+1, k z i v)))
         (snd :: (Int, b) -> b)
         xs
         (0, z0)
@@ -420,7 +417,7 @@ ifoldl k z0 xs =
 ifoldl' :: forall a b. (b -> Int -> a -> b) -> b -> [a] -> b
 ifoldl' k z0 xs =
   foldr (\(v::a) (fn :: (Int, b) -> b) ->
-          ONE_SHOT (\((!i)::Int, z::b) -> z `seq` fn (i+1, k z i v)))
+          oneShot (\((!i)::Int, z::b) -> z `seq` fn (i+1, k z i v)))
         (snd :: (Int, b) -> b)
         xs
         (0, z0)
@@ -442,7 +439,7 @@ imapAccumL
   -> (acc, [y])
 imapAccumL f z xs =
   foldr (\(x::a) (r :: (Int,acc) -> (acc,[y])) ->
-          ONE_SHOT (\((!i)::Int, s::acc) ->
+          oneShot (\((!i)::Int, s::acc) ->
             let (s', y)   = f s i x
                 (s'', ys) = r (i+1, s')
             in (s'', y:ys)))
@@ -561,7 +558,7 @@ izipWith :: (Int -> a -> b -> c) -> [a] -> [b] -> [c]
 izipWith fun xs ys = go 0# xs ys
   where
     go i (a:as) (b:bs) = fun (I# i) a b : go (i +# 1#) as bs
-    go _ _ _ = []
+    go _ _ _           = []
 {-# NOINLINE [1] izipWith #-}
 
 izipWithFB

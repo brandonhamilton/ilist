@@ -90,7 +90,7 @@ imapM__rec f as = go 0# as
   where
     go _ [] = return ()
     go i (x:xs) = do
-      f (I# i) x
+      _ <- f (I# i) x
       go (i +# 1#) xs
 {-# INLINE imapM__rec #-}
 
@@ -250,7 +250,7 @@ izipWithM__rec :: Monad m => (Int -> a -> b -> m c) -> [a] -> [b] -> m ()
 izipWithM__rec f xs ys = go 0# xs ys
   where
     go i (a:as) (b:bs) = do
-      f (I# i) a b
+      _ <- f (I# i) a b
       go (i +# 1#) as bs
     go _ _ _ = return ()
 {-# INLINE izipWithM__rec #-}

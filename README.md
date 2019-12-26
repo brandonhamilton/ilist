@@ -1,8 +1,11 @@
 # ilist
 
-[![Hackage](https://img.shields.io/hackage/v/ilist.svg)](https://hackage.haskell.org/package/ilist)
-[![Build status](https://secure.travis-ci.org/aelve/ilist.svg)](https://travis-ci.org/aelve/ilist)
-[![BSD3 license](https://img.shields.io/badge/license-BSD3-blue.svg)](https://github.com/aelve/ilist/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/kowainik/ilist.svg?logo=travis)](http://travis-ci.org/kowainik/ilist)
+[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/kowainik/ilist?branch=master&svg=true)](https://ci.appveyor.com/project/kowainik/ilist)
+[![Hackage](https://img.shields.io/hackage/v/ilist.svg?logo=haskell)](https://hackage.haskell.org/package/ilist)
+[![Stackage LTS](http://stackage.org/package/ilist/badge/lts)](http://stackage.org/lts/package/ilist)
+[![Stackage Nightly](http://stackage.org/package/ilist/badge/nightly)](http://stackage.org/nightly/package/ilist)
+[![MPL-2.0 license](https://img.shields.io/badge/license-MPL--2.0-blue.svg)](https://github.com/kowainik/ilist/blob/master/LICENSE)
 
 ## What is this
 
