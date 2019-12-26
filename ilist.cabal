@@ -1,6 +1,6 @@
 cabal-version:       2.4
 name:                ilist
-version:             0.3.1.1
+version:             0.4.0.0
 synopsis:            Optimised list functions for doing index-related things
 description:
   Optimised list functions for doing index-related things. They're

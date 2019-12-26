@@ -3,9 +3,9 @@
 `ilist` uses [PVP Versioning][1].
 The changelog is available [on GitHub][2].
 
-## 0.3.1.1 — Dec 26, 2019
+## 0.4.0.0 — Dec 26, 2019
 
-* Support latest major GHC versions.
+* Support GHC-8.8, GHC-8.6, GHC-8.4, GHC-8.2. Drop older GHC versions support.
 * Update maintenance info.
 
 ## 0.3.1.0
