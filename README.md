@@ -1,6 +1,6 @@
 # ilist
 
-[![Travis](https://img.shields.io/travis/kowainik/ilist.svg?logo=travis)](http://travis-ci.org/kowainik/ilist)
+[![GitHub CI](https://github.com/kowainik/ilist/workflows/CI/badge.svg)](https://github.com/kowainik/ilist/actions)
 [![AppVeyor](https://ci.appveyor.com/api/projects/status/github/kowainik/ilist?branch=master&svg=true)](https://ci.appveyor.com/project/kowainik/ilist)
 [![Hackage](https://img.shields.io/hackage/v/ilist.svg?logo=haskell)](https://hackage.haskell.org/package/ilist)
 [![Stackage LTS](http://stackage.org/package/ilist/badge/lts)](http://stackage.org/lts/package/ilist)
