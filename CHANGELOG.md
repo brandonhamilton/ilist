@@ -5,7 +5,7 @@ The changelog is available [on GitHub][2].
 
 ## 0.4.0.1 — May 7, 2020
 
-* [#7](https://github.com/kowainik/ilist/issues/7):
+* [#7](https://github.com/brandonhamilton/ilist/issues/7):
   Support GHC-8.10. Move from GHC-8.8.1 support to GHC-8.8.3.
 
 ## 0.4.0.0 — Dec 26, 2019
@@ -30,4 +30,4 @@ The changelog is available [on GitHub][2].
 First release.
 
 [1]: https://pvp.haskell.org
-[2]: https://github.com/kowainik/ilist/releases
+[2]: https://github.com/brandonhamilton/ilist/releases

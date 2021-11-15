@@ -7,8 +7,8 @@ description:
   faster than common idioms in all cases, they avoid
   <https://ghc.haskell.org/trac/ghc/ticket/12620 space leaks>, and
   sometimes they fuse better as well.
-homepage:            http://github.com/kowainik/ilist
-bug-reports:         http://github.com/kowainik/ilist/issues
+homepage:            http://github.com/brandonhamilton/ilist
+bug-reports:         http://github.com/brandonhamilton/ilist/issues
 license:             MPL-2.0
 license-file:        LICENSE
 author:              Artyom
@@ -29,7 +29,7 @@ tested-with:         GHC == 8.2.2
 
 source-repository head
   type:                git
-  location:            https://github.com/kowainik/ilist.git
+  location:            https://github.com/brandonhamilton/ilist.git
 
 common common-options
   build-depends:       base >= 4.10 && < 4.17

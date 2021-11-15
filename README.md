@@ -1,7 +1,6 @@
 # ilist
 
-[![GitHub CI](https://github.com/kowainik/ilist/workflows/CI/badge.svg)](https://github.com/kowainik/ilist/actions)
-[![AppVeyor](https://ci.appveyor.com/api/projects/status/github/kowainik/ilist?branch=main&svg=true)](https://ci.appveyor.com/project/kowainik/ilist)
+[![GitHub CI](https://github.com/brandonhamilton/ilist/workflows/CI/badge.svg)](https://github.com/brandonhamilton/ilist/actions)
 [![Hackage](https://img.shields.io/hackage/v/ilist.svg?logo=haskell)](https://hackage.haskell.org/package/ilist)
 [![Stackage LTS](http://stackage.org/package/ilist/badge/lts)](http://stackage.org/lts/package/ilist)
 [![Stackage Nightly](http://stackage.org/package/ilist/badge/nightly)](http://stackage.org/nightly/package/ilist)
@@ -9,7 +8,7 @@
 
 ## What is this
 
-This is a library with lots of list functions that are related to indices. It has often-reinvented `deleteAt`, `setAt`, etc, as well as indexed variants of functions from `Data.List` (e.g. `imap`, `ifilter`, `izipWith`). It has no dependencies, builds in about a second, and works on GHC from 7.4 to 8.0; the functions are [optimised](https://github.com/kowainik/ilist/blob/main/lib/Data/List/Index.hs) and benchmarked (for instance, the `zip [0..]` idiom is usually twice as slow, and sometimes 20× as slow).
+This is a library with lots of list functions that are related to indices. It has often-reinvented `deleteAt`, `setAt`, etc, as well as indexed variants of functions from `Data.List` (e.g. `imap`, `ifilter`, `izipWith`). It has no dependencies, builds in about a second, and works on GHC from 7.4 to 8.0; the functions are [optimised](https://github.com/brandonhamilton/ilist/blob/main/lib/Data/List/Index.hs) and benchmarked (for instance, the `zip [0..]` idiom is usually twice as slow, and sometimes 20× as slow).
 
 So, this library is intended to be the canonical place for index-related functions. You are encouraged to depend on this library instead of reinventing the functions, using `zip [0..]`, or using [lens](hackage.haskell.org/package/lens) when all you need is a simple `imap` or `ifoldr` (not to mention that lens variants are usually 2–10 times slower for lists).
 
