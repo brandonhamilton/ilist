@@ -20,8 +20,8 @@ environment:
 
 install:
   - choco source add -n mistuke -s https://www.myget.org/F/mistuke/api/v2
-  - choco install -y cabal --version 3.0.0.0
-  - choco install -y ghc   --version 8.8.1
+  - choco install -y cabal --version 3.6.2.0
+  - choco install -y ghc   --version 9.0.1
   - refreshenv
 
 before_build:
